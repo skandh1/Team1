@@ -4,11 +4,28 @@ const projectSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     description: { type: String, required: true },
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     applicants: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    selectedApplicants: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     technologies: {
       type: [String],
-      enum: ["React", "Node.js", "Express", "MongoDB", "PostgreSQL", "Python", "Django", "Angular", "Vue.js", "Java", "Spring Boot"],
+      enum: [
+        "React",
+        "Node.js",
+        "Express",
+        "MongoDB",
+        "PostgreSQL",
+        "Python",
+        "Django",
+        "Angular",
+        "Vue.js",
+        "Java",
+        "Spring Boot",
+      ],
       required: true,
     },
     isEnabled: { type: Boolean, default: true },
@@ -24,9 +41,6 @@ const projectSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-
-
 const Project = mongoose.model("Project", projectSchema);
 
 export default Project;
-

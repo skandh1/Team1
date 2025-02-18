@@ -146,7 +146,7 @@ export const applyToProject = async (req, res) => {
     }
 
     const { projectId } = req.body;
-    console.log("project id ", projectId)// Get project ID from URL
+    
 
     // Find the project
     const project = await Project.findById(projectId);

@@ -28,7 +28,7 @@ export const deleteProject = async (req, res) => {
 export const tollgeProject = async (req, res) => {
   try {
     const project = await Project.findOne({ _id: req.params.id, createdBy: req.user._id });
-    console.log({ _id: req.params, createdBy: req.user._id })
+    
     if (!project) {
       return res.status(404).json({ message: "Project not found or unauthorized" });
     }
@@ -43,13 +43,49 @@ export const tollgeProject = async (req, res) => {
 
 export const getAllCandidates = async (req, res) => {
   try {
-    const project = await Project.findOne({ _id: req.params.id, createdBy: req.user._id })
-      .populate("applicants", "name email");
+    const project = await Project.findOne({ _id: req.params.id })
+      .populate("applicants", "name email username")
+      .populate("selectedApplicants", "name email username");
+
     if (!project) {
       return res.status(404).json({ message: "Project not found or unauthorized" });
     }
-    res.status(200).json(project.applicants);
+
+    res.status(200).json({ 
+      applicants: project.applicants, 
+      selectedApplicants: project.selectedApplicants 
+    });
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch projects", error: error.message });
+    res.status(500).json({ message: "Failed to fetch applicants", error: error.message });
   }
-}
+};
+
+export const selectApplicant = async (req, res) => {
+  try {
+    const { projectId, applicantId } = req.body;
+    
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    const applicant = project.applicants.find(
+      (app) => app.toString() === applicantId
+    );
+    if (!applicant) {
+      return res.status(400).json({ message: "Applicant not found in project" });
+    }
+
+    // Move applicant from `applicants` to `selectedApplicants`
+    project.applicants = project.applicants.filter(
+      (app) => app.toString() !== applicantId
+    );
+    project.selectedApplicants.push(applicant);
+
+    await project.save();
+
+    res.status(200).json({ message: "Applicant selected successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};

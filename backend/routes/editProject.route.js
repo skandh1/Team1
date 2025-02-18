@@ -4,6 +4,7 @@ import {
   deleteProject,
   getAllCandidates,
   getMyProjects,
+  selectApplicant,
   tollgeProject,
 } from "../controllers/editProject.controller.js";
 
@@ -12,6 +13,6 @@ const router = express.Router();
 router.patch("/:id", protectRoute, tollgeProject);
 router.get("/", protectRoute, getMyProjects);
 router.delete("/:id", protectRoute, deleteProject);
-router.get("/", protectRoute, getAllCandidates);
-
+router.get("/applicants/:id", protectRoute, getAllCandidates);
+router.post("/select-applicant", protectRoute, selectApplicant)
 export default router;
