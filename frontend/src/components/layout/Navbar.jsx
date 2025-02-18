@@ -45,6 +45,10 @@ const Navbar = () => {
 									<Home size={20} />
 									<span className='text-xs hidden md:block'>Home</span>
 								</Link>
+								<Link to={"/editProject"} className='text-neutral flex flex-col items-center'>
+									<Home size={20} />
+									<span className='text-xs hidden md:block'>see my own project</span>
+								</Link>
 								<Link to={"/projectdisplay"} className='text-neutral flex flex-col items-center'>
 									<Home size={20} />
 									<span className='text-xs hidden md:block'>See Projects</span>

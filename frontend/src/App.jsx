@@ -15,6 +15,7 @@ import ProfilePage from "./pages/ProfilePage";
 import SearchPage from "./pages/SearchPage";
 import CreateProjectPage from "./pages/CreateProjectPage";
 import ProjectDisplayPage from "./pages/ProjectDisplayPage";
+import MyProjectsPage from "./pages/MyProjectsPage";
 
 function App() {
     const { data: authUser, isLoading } = useQuery({
@@ -42,6 +43,7 @@ function App() {
                 <Route path='/signup' element={!authUser ? <SignUpPage /> : <Navigate to={'/'} />} />
                 <Route path='/login' element={!authUser ? <LoginPage /> : <Navigate to={'/'} />} />
                 <Route path='/notifications' element={authUser ? <NotificationsPage /> : <Navigate to={'/login'} />} />
+                <Route path='/editProject' element={authUser ? <MyProjectsPage /> : <Navigate to={'/login'} />} />
                 <Route path='/projectdisplay' element={authUser ? <ProjectDisplayPage /> : <Navigate to={'/login'} />} />
                 <Route path='/search' element={authUser ? <SearchPage /> : <Navigate to={'/login'} />} />
 								<Route path='/createprojectpage' element={authUser ? <CreateProjectPage /> : <Navigate to={'/login'} />} />
