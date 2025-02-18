@@ -45,9 +45,17 @@ const Navbar = () => {
 									<Home size={20} />
 									<span className='text-xs hidden md:block'>Home</span>
 								</Link>
+								<Link to={"/projectdisplay"} className='text-neutral flex flex-col items-center'>
+									<Home size={20} />
+									<span className='text-xs hidden md:block'>See Projects</span>
+								</Link>
 								<Link to={"/search"} className='text-neutral flex flex-col items-center'>
 									<SearchCheck size={20} />
 									<span className='text-xs hidden md:block'>Search</span>
+								</Link>
+								<Link to={"/createprojectpage"} className='text-neutral flex flex-col items-center'>
+									<SearchCheck size={20} />
+									<span className='text-xs hidden md:block'>Create Project</span>
 								</Link>
 								<Link to='/network' className='text-neutral flex flex-col items-center relative'>
 									<Users size={20} />

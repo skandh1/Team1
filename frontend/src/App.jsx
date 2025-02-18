@@ -13,6 +13,8 @@ import NetworkPage from "./pages/NetworkPage";
 import PostPage from "./pages/PostPage";
 import ProfilePage from "./pages/ProfilePage";
 import SearchPage from "./pages/SearchPage";
+import CreateProjectPage from "./pages/CreateProjectPage";
+import ProjectDisplayPage from "./pages/ProjectDisplayPage";
 
 function App() {
     const { data: authUser, isLoading } = useQuery({
@@ -40,10 +42,13 @@ function App() {
                 <Route path='/signup' element={!authUser ? <SignUpPage /> : <Navigate to={'/'} />} />
                 <Route path='/login' element={!authUser ? <LoginPage /> : <Navigate to={'/'} />} />
                 <Route path='/notifications' element={authUser ? <NotificationsPage /> : <Navigate to={'/login'} />} />
+                <Route path='/projectdisplay' element={authUser ? <ProjectDisplayPage /> : <Navigate to={'/login'} />} />
                 <Route path='/search' element={authUser ? <SearchPage /> : <Navigate to={'/login'} />} />
+								<Route path='/createprojectpage' element={authUser ? <CreateProjectPage /> : <Navigate to={'/login'} />} />
                 <Route path='/network' element={authUser ? <NetworkPage /> : <Navigate to={'/login'} />} />
                 <Route path='/post/:postId' element={authUser ? <PostPage /> : <Navigate to={'/login'} />} />
-                <Route path='/profile/:username' element={authUser ? <ProfilePage /> : <Navigate to={'/login'} />} />
+					<Route path='/profile/:username' element={authUser ? <ProfilePage /> : <Navigate to={'/login'} />} />
+					
             </Routes>
             <Toaster />
         </Layout>
