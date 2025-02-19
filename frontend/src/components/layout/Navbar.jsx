@@ -57,6 +57,10 @@ const Navbar = () => {
 									<SearchCheck size={20} />
 									<span className='text-xs hidden md:block'>Search</span>
 								</Link>
+								<Link to={"/appliedProject"} className='text-neutral flex flex-col items-center'>
+									<SearchCheck size={20} />
+									<span className='text-xs hidden md:block'>appliedProject</span>
+								</Link>
 								<Link to={"/createprojectpage"} className='text-neutral flex flex-col items-center'>
 									<SearchCheck size={20} />
 									<span className='text-xs hidden md:block'>Create Project</span>

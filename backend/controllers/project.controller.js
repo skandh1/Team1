@@ -1,4 +1,5 @@
 import Project from "../models/project.model.js";
+import User from "../models/user.model.js";
 
 // Allowed technologies
 const ALLOWED_TECHNOLOGIES = [
@@ -137,7 +138,6 @@ export const getProjects = async (req, res) => {
 };
 
 
-
 export const applyToProject = async (req, res) => {
   try {
     // Ensure user is authenticated
@@ -145,9 +145,9 @@ export const applyToProject = async (req, res) => {
       return res.status(401).json({ message: "Unauthorized. Please log in." });
     }
 
-    const { projectId } = req.body;
+    const projectId = req.params.id;
     
-
+    
     // Find the project
     const project = await Project.findById(projectId);
     if (!project) {
@@ -163,9 +163,17 @@ export const applyToProject = async (req, res) => {
     project.applicants.push(req.user._id);
     await project.save();
 
+    // Update user's selectedProjects array
+    const user = await User.findById(req.user._id);
+    if (!user.appliedProject.includes(projectId)) {
+      user.appliedProject.push(projectId);
+      await user.save();
+    }
+
     res.status(200).json({ message: "Successfully applied to the project!" });
 
   } catch (error) {
     res.status(500).json({ message: "Internal server error", error: error.message });
   }
 };
+

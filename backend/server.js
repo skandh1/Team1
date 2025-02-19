@@ -12,6 +12,7 @@ import connectionRoutes from "./routes/connection.route.js";
 import searchUser from "./routes/search.route.js"
 import projectRoutes from "./routes/project.route.js";
 import editProjectRoutes from "./routes/editProject.route.js";
+import appliedProjectsRoutes from "./routes/appliedProjects.route.js";
 
 import { connectDB } from "./lib/db.js";
 
@@ -41,6 +42,7 @@ app.use("/api/v1/connections", connectionRoutes);
 app.use("/api/v1/search", searchUser);
 app.use("/api/v1/project", projectRoutes);
 app.use("/api/v1/editProject", editProjectRoutes);
+app.use("/api/v1/appliedProjects", appliedProjectsRoutes);
 
 
 if (process.env.NODE_ENV === "production") {
