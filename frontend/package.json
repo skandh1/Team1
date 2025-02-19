@@ -19,7 +19,9 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hot-toast": "^2.4.1",
-    "react-router-dom": "^6.26.1"
+    "react-router-dom": "^6.26.1",
+    "stream-chat": "^8.56.1",
+    "stream-chat-react": "^12.13.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",

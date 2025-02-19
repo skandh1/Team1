@@ -13,6 +13,7 @@ import searchUser from "./routes/search.route.js"
 import projectRoutes from "./routes/project.route.js";
 import editProjectRoutes from "./routes/editProject.route.js";
 import appliedProjectsRoutes from "./routes/appliedProjects.route.js";
+import chatRoutes from "./routes/chat.route.js";
 
 import { connectDB } from "./lib/db.js";
 
@@ -43,6 +44,7 @@ app.use("/api/v1/search", searchUser);
 app.use("/api/v1/project", projectRoutes);
 app.use("/api/v1/editProject", editProjectRoutes);
 app.use("/api/v1/appliedProjects", appliedProjectsRoutes);
+app.use("/api/v1/chat/", chatRoutes);
 
 
 if (process.env.NODE_ENV === "production") {

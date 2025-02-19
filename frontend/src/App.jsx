@@ -17,6 +17,7 @@ import CreateProjectPage from "./pages/CreateProjectPage";
 import ProjectDisplayPage from "./pages/ProjectDisplayPage";
 import MyProjectsPage from "./pages/MyProjectsPage";
 import AppliedProjectPage from "./pages/appliedProjectPage";
+import ChatPage from "./pages/ChatPage";
 
 function App() {
     const { data: authUser, isLoading } = useQuery({
@@ -46,6 +47,7 @@ function App() {
                 <Route path='/notifications' element={authUser ? <NotificationsPage /> : <Navigate to={'/login'} />} />
                 <Route path='/editProject' element={authUser ? <MyProjectsPage /> : <Navigate to={'/login'} />} />
                 <Route path='/appliedProject' element={authUser ? <AppliedProjectPage /> : <Navigate to={'/login'} />} />
+                <Route path='/chat' element={authUser ? <ChatPage /> : <Navigate to={'/login'} />} />
 
                 <Route path='/projectdisplay' element={authUser ? <ProjectDisplayPage /> : <Navigate to={'/login'} />} />
                 <Route path='/search' element={authUser ? <SearchPage /> : <Navigate to={'/login'} />} />

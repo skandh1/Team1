@@ -3,12 +3,14 @@ import User from "../models/user.model.js"
 export const searchUser = async (req, res) => {
   try {
     // Get the search query from the request
-    const { q } = req.query;
+    const { query } = req.query;
+    const q = query 
+    
 
     if (!q || q.trim() === '') {
       return res.status(400).json({ message: 'Search query is required.' });
     }
-
+    
     // Perform a case-insensitive search for username or name
     const results = await User.find({
       $or: [
