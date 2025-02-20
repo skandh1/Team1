@@ -19,7 +19,7 @@ const ChatComponent = () => {
   const getCurrentUserId = async () => {
     try {
       const response = await axiosInstance.get("/auth/me");
-      return response.data._id;
+      return response.data;
     } catch (error) {
       console.error(error);
       throw new Error("Failed to retrieve user ID");
@@ -28,7 +28,7 @@ const ChatComponent = () => {
 
 (async () => {
   currentUserId = await getCurrentUserId();
-  console.log(currentUserId);
+  
 })();
   // Call the function
 
@@ -73,8 +73,8 @@ const ChatComponent = () => {
 
         await chatClient.connectUser(
           {
-            id: currentUserId,
-            name: "CURRENT_USER_NAME", // Replace with the current user's name
+            id: currentUserId._id,
+            name: currentUserId.username, // Replace with the current user's name
           },
           token
         );
@@ -99,7 +99,7 @@ const ChatComponent = () => {
 
     try {
       const channelData = await createChannelMutation.mutateAsync({
-        user1Id: currentUserId,
+        user1Id: currentUserId._id,
         user2Id: user._id,
       });
 
