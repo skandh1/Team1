@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
@@ -12,6 +12,20 @@ const availableTechnologies = [
 function ProjectDisplayPage() {
   const [selectedTech, setSelectedTech] = useState([]);
   const [page, setPage] = useState(1);
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const response = await axiosInstance.get("/auth/me"); // **REPLACE with your actual endpoint**
+        setUserId(response.data._id); // Adjust if your user ID is not under `_id`
+      } catch (error) {
+        console.error("Error fetching user ID:", error);
+        // Handle error: redirect, show message, etc.
+      }
+    };
+    fetchUserId();
+  }, []);
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["projects", selectedTech, page],
@@ -22,6 +36,14 @@ function ProjectDisplayPage() {
           page: page,
         },
       });
+
+      if (response.data && Array.isArray(response.data)) {
+        const populatedProjects = response.data.map(project => ({
+          ...project,
+          applicants: project.applicants || [], // Important: Handle potentially missing applicants
+        }));
+        return populatedProjects;
+      }
       return response.data;
     },
     onError: (error) => {
@@ -33,6 +55,7 @@ function ProjectDisplayPage() {
     setSelectedTech((prev) =>
       prev.includes(tech) ? prev.filter((t) => t !== tech) : [...prev, tech]
     );
+    setPage(1); // Reset page when filtering
   };
 
   const handlePageChange = (newPage) => {
@@ -41,38 +64,37 @@ function ProjectDisplayPage() {
 
   const handleApply = async (projectId) => {
     try {
-      console.log("Applying to project", projectId);
-      const response = await axiosInstance.post(`/project/apply/${projectId}`, { projectId });
+      const response = await axiosInstance.post(`/project/apply/${projectId}`);
       toast.success(response.data.message);
-      refetch(); // Refresh project list after applying
+      refetch();
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to apply.");
     }
   };
 
-  if (isLoading) return <Loader className="animate-spin mx-auto text-blue-500" size={48} />;
+  if (isLoading || !userId) return <Loader className="animate-spin mx-auto text-blue-500" size={48} />;
   if (isError) return <p>Error loading projects.</p>;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-6">
-      <div className="w-full max-w-3xl bg-white shadow-lg rounded-xl p-8 space-y-6">
-        <h1 className="text-2xl font-bold text-center">Projects</h1>
+    <div className="min-h-screen bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 flex flex-col items-center justify-center p-6">
+      <div className="w-full max-w-3xl bg-white shadow-lg rounded-3xl p-8 space-y-8 transition-transform duration-300 hover:scale-105">
+        <h1 className="text-3xl font-bold text-center text-blue-600 mb-6">Projects</h1>
 
         {/* Filter Bar */}
-        <div className="border rounded-lg p-3 bg-gray-50">
-          <div className="flex items-center mb-2 text-gray-600">
-            <Code size={20} className="mr-2" />
+        <div className="border rounded-xl p-4 bg-gray-50 shadow-inner">
+          <div className="flex items-center mb-4 text-gray-700 font-medium">
+            <Code size={20} className="mr-2 text-blue-500" />
             <span>Select Technologies:</span>
           </div>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {availableTechnologies.map((tech) => (
               <button
                 key={tech}
                 onClick={() => handleTechnologySelect(tech)}
-                className={`px-3 py-1 rounded-md text-sm transition-all ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   selectedTech.includes(tech)
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 hover:bg-gray-300"
+                    ? "bg-blue-600 text-white shadow"
+                    : "bg-gray-200 text-gray-700 hover:bg-gray-300 hover:shadow-sm"
                 }`}
               >
                 {tech}
@@ -82,21 +104,20 @@ function ProjectDisplayPage() {
         </div>
 
         {/* Projects List */}
-        <div className="projects-list space-y-4">
-          {Array.isArray(data) && data.length > 0 ? (
+        <div className="space-y-6">
+          {data && data.length > 0 ? ( // Check if data exists and has length
             data.map((project) => (
-              <div key={project._id} className="p-4 border rounded-lg bg-gray-50">
-                <h2 className="text-xl font-semibold">{project.name}</h2>
-                <p className="text-gray-600">{project.description}</p>
-                <p className="mt-2 text-sm text-gray-500">
+              <div key={project._id} className="p-6 border rounded-2xl bg-gray-50 shadow-md hover:shadow-lg transition-transform duration-200 hover:scale-[1.02]">
+                <h2 className="text-2xl font-semibold text-blue-600 mb-2">{project.name}</h2>
+                <p className="text-gray-700 leading-relaxed">{project.description}</p>
+                <p className="mt-3 text-sm text-gray-500">
                   Technologies: {project.technologies?.join(", ")}
                 </p>
 
-                {/* Apply Button - Only show if user hasn't applied */}
-                {!project.applicants.includes("user_id_here") && ( // Replace with actual user ID
+                {!project.applicants?.includes(userId) && userId && ( // Correct conditional check
                   <button
                     onClick={() => handleApply(project._id)}
-                    className="mt-3 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                    className="mt-4 px-5 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200"
                   >
                     Apply to Project
                   </button>
@@ -104,28 +125,28 @@ function ProjectDisplayPage() {
               </div>
             ))
           ) : (
-            <p>No projects found.</p>
+            <p className="text-center text-gray-600">No projects found.</p>
           )}
         </div>
 
         {/* Pagination */}
-        <div className="flex justify-between items-center mt-6">
+        <div className="flex justify-between items-center mt-8">
           <button
             onClick={() => handlePageChange(page - 1)}
             disabled={page <= 1}
             className={`flex items-center ${
-              page <= 1 ? "text-gray-400 cursor-not-allowed" : "text-blue-500"
+              page <= 1 ? "text-gray-400 cursor-not-allowed" : "text-blue-600 hover:text-blue-700 transition-colors duration-200"
             }`}
           >
             <ArrowLeftCircle size={24} />
-            <span className="ml-1">Previous</span>
+            <span className="ml-2">Previous</span>
           </button>
-          <span>Page {page}</span>
+          <span className="text-gray-700 font-medium">Page {page}</span>
           <button
             onClick={() => handlePageChange(page + 1)}
-            className={`flex items-center text-blue-500`}
+            className={`flex items-center text-blue-600 hover:text-blue-700 transition-colors duration-200`}
           >
-            <span className="mr-1">Next</span>
+            <span className="mr-2">Next</span>
             <ArrowRightCircle size={24} />
           </button>
         </div>

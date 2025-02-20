@@ -1,5 +1,6 @@
 import Project from "../models/project.model.js";
 import User from "../models/user.model.js";
+import Notification from "../models/notification.model.js";
 
 // Allowed technologies
 const ALLOWED_TECHNOLOGIES = [
@@ -121,22 +122,22 @@ export const getProjects = async (req, res) => {
       isEnabled: true,
       applicants: { $ne: req.user._id }, // Exclude projects where the user is in the applicants array
     };
-    
+
     // If technologies array is not empty, apply the filter
     if (techArray.length > 0) {
       filter.technologies = { $in: techArray };
     }
-    
+
     const projects = await Project.find(filter).skip(skip).limit(limit).exec();
 
     // Send the found projects
     res.status(200).json(projects);
-} catch (error) {
-    res.status(500).json({ message: "Internal server error", error: error.message });
-}
-
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
+  }
 };
-
 
 export const applyToProject = async (req, res) => {
   try {
@@ -146,8 +147,7 @@ export const applyToProject = async (req, res) => {
     }
 
     const projectId = req.params.id;
-    
-    
+
     // Find the project
     const project = await Project.findById(projectId);
     if (!project) {
@@ -156,7 +156,9 @@ export const applyToProject = async (req, res) => {
 
     // Check if the user is already an applicant
     if (project.applicants.includes(req.user._id)) {
-      return res.status(400).json({ message: "You have already applied to this project." });
+      return res
+        .status(400)
+        .json({ message: "You have already applied to this project." });
     }
 
     // Add user to applicants
@@ -170,10 +172,20 @@ export const applyToProject = async (req, res) => {
       await user.save();
     }
 
-    res.status(200).json({ message: "Successfully applied to the project!" });
+    if (project.createdBy.toString() !== req.user._id.toString()) {
+      // Use created_by
+      const newNotification = new Notification({
+        recipient: project.createdBy, // Use created_by
+        type: "applied",
+        relatedUser: req.user._id, // Project ID goes in relatedPost
+      });
 
+      await newNotification.save();
+    }
+    res.status(200).json({ message: "Successfully applied to the project!" });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   }
 };
-

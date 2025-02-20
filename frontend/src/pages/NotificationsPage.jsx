@@ -35,11 +35,14 @@ const NotificationsPage = () => {
 		switch (type) {
 			case "like":
 				return <ThumbsUp className='text-blue-500' />;
-
+			case "applied":
+				return <Eye size={18} className='text-gray-500' />;
 			case "comment":
 				return <MessageSquare className='text-green-500' />;
 			case "connectionAccepted":
 				return <UserPlus className='text-purple-500' />;
+			case "selected":
+				return <UserPlus className='text-purple-800' />;
 			default:
 				return null;
 		}
@@ -62,6 +65,15 @@ const NotificationsPage = () => {
 						commented on your post
 					</span>
 				);
+			case "applied":
+				return (
+					<span>
+						<Link to={`/profile/${notification.relatedUser.username}`} className='font-bold'>
+							{notification.relatedUser.name}
+						</Link>{" "}
+						applied to your project
+					</span>
+				);
 			case "connectionAccepted":
 				return (
 					<span>
@@ -71,6 +83,16 @@ const NotificationsPage = () => {
 						accepted your connection request
 					</span>
 				);
+			case "selected":
+				return (
+          <span>
+            <Link to={`/profile/${notification.relatedUser.username}`} className='font-bold'>
+              {notification.relatedUser.name}
+            </Link>{" "}
+            selected you in their project
+          </span>
+        );
+      case "connectionRequest":
 			default:
 				return null;
 		}
