@@ -64,7 +64,7 @@ const Navbar = () => {
           {/* Logo Section */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
-              <img className="h-14 w-auto rounded" src="/teamify.svg" alt="Logo" />
+              <img className="h-10 w-auto rounded" src="/teamify.svg" alt="Logo" />
             </Link>
           </div>
 

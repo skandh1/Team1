@@ -1,4 +1,6 @@
 import User from "../models/user.model.js";
+import Rating from '../models/rating.model.js';
+import Project from '../models/project.model.js'
 import cloudinary from "../lib/cloudinary.js";
 
 export const getSuggestedConnections = async (req, res) => {
@@ -79,4 +81,37 @@ export const updateProfile = async (req, res) => {
 		console.error("Error in updateProfile controller:", error);
 		res.status(500).json({ message: "Server error" });
 	}
+};
+
+
+
+export const getUserMetrics = async (req, res) => {
+  try {
+    const { username } = req.params;
+    const id = User.find({ username: username })._id;
+    // Get user's average rating
+    const ratings = await Rating.find({ reviewee: id });
+    const averageRating = ratings.length > 0
+      ? ratings.reduce((acc, curr) => acc + curr.value, 0) / ratings.length
+      : 0;
+
+    // Get projects where user participated (selected candidates)
+    const projectsParticipated = await Project.countDocuments({
+      'selectedCandidates': id
+    });
+
+    // Get projects created by user
+    const projectsCreated = await Project.countDocuments({
+      createdBy: id
+    });
+
+    res.json({
+      averageRating,
+      projectsParticipated,
+      projectsCreated
+    });
+  } catch (error) {
+    console.error('Error fetching user metrics:', error);
+    res.status(500).json({ error: 'Failed to fetch user metrics' });
+  }
 };

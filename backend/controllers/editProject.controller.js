@@ -132,10 +132,11 @@ export const selectApplicant = async (req, res) => {
 export const updateProjectStatus = async (req, res) => {
   try {
     const { status } = req.body;
-    
-    if (!['Completed', 'cancelled', 'in_progress'].includes(status)) {
-      return res.status(400).json({ 
-        message: "Invalid status. Must be 'completed', 'cancelled', or 'in_progress'" 
+
+    if (!["Completed", "cancelled", "in_progress"].includes(status)) {
+      return res.status(400).json({
+        message:
+          "Invalid status. Must be 'completed', 'cancelled', or 'in_progress'",
       });
     }
 
@@ -145,8 +146,8 @@ export const updateProjectStatus = async (req, res) => {
     });
 
     if (!project) {
-      return res.status(404).json({ 
-        message: "Project not found or unauthorized" 
+      return res.status(404).json({
+        message: "Project not found or unauthorized",
       });
     }
 
@@ -155,51 +156,53 @@ export const updateProjectStatus = async (req, res) => {
     await project.save();
 
     // Only send notifications if project is marked as completed
-    if (status === 'Completed' && project.selectedApplicants?.length > 0) {
+    if (status === "Completed" && project.selectedApplicants?.length > 0) {
       // Check for existing notifications
       const existingNotifications = await Notification.find({
         type: "projectCompleted",
         relatedUser: project.createdBy,
         relatedProject: project._id,
-        recipient: { $in: project.selectedApplicants }
+        recipient: { $in: project.selectedApplicants },
       });
 
       // Filter out users who already have notifications
-      const existingRecipients = new Set(existingNotifications.map(n => n.recipient.toString()));
+      const existingRecipients = new Set(
+        existingNotifications.map((n) => n.recipient.toString())
+      );
       const newRecipients = project.selectedApplicants.filter(
-        candidateId => !existingRecipients.has(candidateId.toString())
+        (candidateId) => !existingRecipients.has(candidateId.toString())
       );
 
       if (newRecipients.length > 0) {
-        const notifications = newRecipients.map(candidateId => ({
+        const notifications = newRecipients.map((candidateId) => ({
           recipient: candidateId,
           type: "projectCompleted",
           relatedUser: project.createdBy,
           relatedProject: project._id,
           message: `The project "${project.name}" has been marked as completed.`,
           createdAt: new Date(),
-          read: false
+          read: false,
         }));
 
         await Notification.insertMany(notifications);
       }
 
-      return res.status(200).json({ 
-        message: "Project marked as completed and notifications sent to new recipients.",
-        project
+      return res.status(200).json({
+        message:
+          "Project marked as completed and notifications sent to new recipients.",
+        project,
       });
     }
 
-    res.status(200).json({ 
+    res.status(200).json({
       message: `Project status updated to ${status}`,
-      project
+      project,
     });
-
   } catch (error) {
-    console.error('Error updating project status:', error);
-    res.status(500).json({ 
-      message: "Failed to update project status", 
-      error: error.message 
+    console.error("Error updating project status:", error);
+    res.status(500).json({
+      message: "Failed to update project status",
+      error: error.message,
     });
   }
 };
@@ -211,50 +214,48 @@ export const submitProjectRatings = async (req, res) => {
 
     const project = await Project.findOne({
       _id: projectId,
-      createdBy: req.user._id,
-      status: 'Completed'
+      status: "Completed",
     });
 
     if (!project) {
       return res.status(404).json({
-        message: "Project not found, unauthorized, or not completed"
+        message: "Project not found, unauthorized, or not completed",
       });
     }
 
     // Create ratings
-    const ratingDocs = ratings.map(rating => ({
+    const ratingDocs = ratings.map((rating) => ({
       project: projectId,
       reviewer: req.user._id,
       reviewee: rating.userId,
       value: rating.rating,
       feedback: rating.feedback,
-      type: 'project_completion'
+      type: "project_completion",
     }));
 
     await Rating.insertMany(ratingDocs);
 
     // Create notifications for rated users
-    const notifications = ratings.map(rating => ({
+    const notifications = ratings.map((rating) => ({
       recipient: rating.userId,
       type: "projectRating",
       relatedUser: req.user._id,
       relatedProject: projectId,
       message: `You've received a rating for your work on "${project.name}".`,
       createdAt: new Date(),
-      read: false
+      read: false,
     }));
 
     await Notification.insertMany(notifications);
 
     res.status(200).json({
-      message: "Ratings submitted successfully"
+      message: "Ratings submitted successfully",
     });
-
   } catch (error) {
-    console.error('Error submitting project ratings:', error);
+    console.error("Error submitting project ratings:", error);
     res.status(500).json({
       message: "Failed to submit ratings",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -268,10 +269,12 @@ export const getUserDetails = async (req, res) => {
     }
 
     // Extract actual ObjectId strings
-    const extractedIds = userIds
+    const extractedIds = userIds;
 
     // Validate ObjectIds
-    const validIds = extractedIds.filter(id => mongoose.Types.ObjectId.isValid(id));
+    const validIds = extractedIds.filter((id) =>
+      mongoose.Types.ObjectId.isValid(id)
+    );
 
     if (validIds.length === 0) {
       return res.status(400).json({ message: "No valid user IDs provided" });
@@ -284,7 +287,9 @@ export const getUserDetails = async (req, res) => {
     );
     res.status(200).json({ users });
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch user details", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch user details", error: error.message });
   }
 };
 
@@ -296,18 +301,17 @@ export const getProjectRatings = async (req, res) => {
     const ratings = await Rating.find({
       project: projectId,
       reviewer: req.user._id,
-      type: 'project_completion'
-    }).select('reviewee value feedback createdAt');
+      type: "project_completion",
+    }).select("reviewee value feedback createdAt");
 
     res.status(200).json({
-      ratings: ratings
+      ratings: ratings,
     });
-
   } catch (error) {
-    console.error('Error fetching project ratings:', error);
+    console.error("Error fetching project ratings:", error);
     res.status(500).json({
       message: "Failed to fetch ratings",
-      error: error.message
+      error: error.message,
     });
   }
 };

@@ -229,3 +229,29 @@ export const applyToProject = async (req, res) => {
       .json({ message: "Internal server error", error: error.message });
   }
 };
+
+export const getSingleProject = async (req, res) => {
+  try {
+    const projectId = req.params.id;
+    const currentUserId = req.user._id; // Assuming user ID is available in req.user
+
+    // Fetch project details
+    const project = await Project.findById(projectId).populate("selectedApplicants createdBy");
+
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    // Extract user IDs (creator + selected applicants)
+    let projectUsers = [project.createdBy];
+
+    // Remove the current user
+    console.log(project.createdBy, project.selectedApplicants)
+    projectUsers = projectUsers.filter((user) => user._id.toString() !== currentUserId);
+
+    res.status(200).json(projectUsers);
+  } catch (error) {
+    console.error("Error fetching project:", error);
+    res.status(500).json({ message: "Failed to fetch project" });
+  }
+};

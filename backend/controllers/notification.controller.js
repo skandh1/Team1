@@ -44,3 +44,38 @@ export const deleteNotification = async (req, res) => {
 		res.status(500).json({ message: "Server error" });
 	}
 };
+
+export const markAllNotificationsAsRead = async (req, res) => {
+  try {
+    await Notification.updateMany(
+      { recipient: req.user._id, read: false },
+      { read: true }
+    );
+
+    res.status(200).json({
+      message: "All notifications marked as read"
+    });
+  } catch (error) {
+    console.error('Error marking all notifications as read:', error);
+    res.status(500).json({
+      message: "Failed to mark all notifications as read",
+      error: error.message
+    });
+  }
+};
+
+export const deleteAllNotifications = async (req, res) => {
+  try {
+    await Notification.deleteMany({ recipient: req.user._id });
+
+    res.status(200).json({
+      message: "All notifications deleted successfully"
+    });
+  } catch (error) {
+    console.error('Error deleting all notifications:', error);
+    res.status(500).json({
+      message: "Failed to delete all notifications",
+      error: error.message
+    });
+  }
+};
