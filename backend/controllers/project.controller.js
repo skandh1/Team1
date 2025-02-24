@@ -105,39 +105,80 @@ export const createProject = async (req, res) => {
 
 export const getProjects = async (req, res) => {
   try {
-    // Ensure the user is authenticated
-    if (!req.user) {
-      return res.status(401).json({ message: "Unauthorized. Please log in." });
+    const { 
+      page = 1, 
+      technologies, 
+      search,
+      sortBy = 'recent'
+    } = req.query;
+
+    const userId = req.user._id; // Assuming user info is available in req.user
+    const limit = 10;
+    const skip = (page - 1) * limit;
+
+    // Fetch the current user's applied projects
+    const user = await User.findById(userId).select('appliedProject').lean();
+    const appliedProjects = user?.appliedProject || [];
+
+    // Build query
+    let query = { _id: { $nin: appliedProjects } }; // Exclude applied projects
+
+    // Add technology filter
+    if (technologies) {
+      query.technologies = {
+        $in: technologies.split(',')
+      };
     }
 
-    const { technologies, page = 1 } = req.query; // Get the technologies and page from the query parameters
-    const techArray = technologies ? technologies.split(",") : []; // Parse the technologies array
-
-    // Set pagination options
-    const limit = 10; // Number of projects per page (adjust as necessary)
-    const skip = (page - 1) * limit; // Calculate skip value for pagination
-
-    const filter = {
-      createdBy: { $ne: req.user._id }, // Exclude projects created by the user
-      isEnabled: true,
-      applicants: { $ne: req.user._id }, // Exclude projects where the user is in the applicants array
-    };
-
-    // If technologies array is not empty, apply the filter
-    if (techArray.length > 0) {
-      filter.technologies = { $in: techArray };
+    // Add search filter
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
     }
 
-    const projects = await Project.find(filter).skip(skip).limit(limit).exec();
+    // Build sort options
+    let sortOptions = {};
+    switch (sortBy) {
+      case 'recent':
+        sortOptions = { createdAt: -1 };
+        break;
+      case 'oldest':
+        sortOptions = { createdAt: 1 };
+        break;
+      case 'applicants':
+        sortOptions = { 'applicants.length': -1 };
+        break;
+      default:
+        sortOptions = { createdAt: -1 };
+    }
 
-    // Send the found projects
-    res.status(200).json(projects);
+    const projects = await Project
+      .find(query)
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(limit)
+      .populate('createdBy', 'name username')
+      .lean();
+
+    const total = await Project.countDocuments(query);
+
+    res.json({
+      projects,
+      pagination: {
+        total,
+        pages: Math.ceil(total / limit),
+        current: page,
+        hasMore: skip + projects.length < total
+      }
+    });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Internal server error", error: error.message });
+    console.error('Error fetching projects:', error);
+    res.status(500).json({ message: 'Failed to fetch projects' });
   }
 };
+
 
 export const applyToProject = async (req, res) => {
   try {

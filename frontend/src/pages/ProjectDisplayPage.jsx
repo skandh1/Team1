@@ -9,7 +9,10 @@ import {
   Loader, 
   Sparkles,
   Info,
-  Users
+  Users,
+  Search,
+  SlidersHorizontal,
+  Calendar
 } from "lucide-react";
 import ProjectDetailsModal from "../components/ProjectDetailsModal";
 
@@ -18,12 +21,23 @@ const availableTechnologies = [
   "Python", "Django", "Angular", "Vue.js", "Java", "Spring Boot"
 ];
 
+const sortOptions = [
+  { value: "recent", label: "Most Recent", icon: Calendar },
+  { value: "oldest", label: "Oldest First", icon: Calendar },
+  { value: "applicants", label: "Most Applicants", icon: Users },
+];
+
 function ProjectDisplayPage() {
   const [selectedTech, setSelectedTech] = useState([]);
   const [page, setPage] = useState(1);
-  const [user, setUser] = useState(``)
+  const [user, setUser] = useState(``);
   const [userId, setUserId] = useState(null);
   const [selectedProject, setSelectedProject] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [inputValue, setInputValue] = useState("");
+  const [sortBy, setSortBy] = useState("recent");
+  const [showFilters, setShowFilters] = useState(false);
+  const [timeoutId, setTimeoutId] = useState(null);
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -38,22 +52,29 @@ function ProjectDisplayPage() {
     fetchUserId();
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [timeoutId]);
+
   const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ["projects", selectedTech, page],
+    queryKey: ["projects", selectedTech, page, searchQuery, sortBy],
     queryFn: async () => {
       const response = await axiosInstance.get("/project", {
         params: {
           technologies: selectedTech.length > 0 ? selectedTech.join(",") : undefined,
-          page: page,
+          page,
+          search: searchQuery,
+          sortBy,
         },
       });
 
-      if (response.data && Array.isArray(response.data)) {
-        const populatedProjects = response.data.map(project => ({
+      if (response.data && Array.isArray(response.data.projects)) {
+        return response.data.projects.map(project => ({
           ...project,
           applicants: project.applicants || [],
         }));
-        return populatedProjects;
       }
       return response.data;
     },
@@ -63,14 +84,29 @@ function ProjectDisplayPage() {
   });
 
   const handleTechnologySelect = (tech) => {
-    setSelectedTech((prev) =>
-      prev.includes(tech) ? prev.filter((t) => t !== tech) : [...prev, tech]
+    setSelectedTech(prev =>
+      prev.includes(tech) ? prev.filter(t => t !== tech) : [...prev, tech]
     );
     setPage(1);
   };
 
-  const handlePageChange = (newPage) => {
-    setPage(newPage);
+  const handleInputChange = (event) => {
+    const newValue = event.target.value;
+    setInputValue(newValue);
+    if (timeoutId) clearTimeout(timeoutId);
+    
+    const newTimeoutId = setTimeout(() => {
+      setSearchQuery(newValue.trim());
+      setPage(1);
+    }, 500);
+
+    setTimeoutId(newTimeoutId);
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setSearchQuery(inputValue.trim());
+    setPage(1);
   };
 
   const handleApply = async (projectId) => {
@@ -84,17 +120,14 @@ function ProjectDisplayPage() {
   };
 
   if (isLoading || !userId) return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
-      <div className="flex flex-col items-center gap-4">
-        <Loader className="animate-spin text-blue-600" size={48} />
-        <p className="text-blue-600 font-medium">Loading amazing projects...</p>
-      </div>
+    <div className="flex items-center justify-center min-h-[50vh]">
+      <Loader className="animate-spin text-blue-600" size={40} />
     </div>
   );
   
   if (isError) return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-pink-50">
-      <p className="text-red-600 font-medium">Error loading projects.</p>
+    <div className="flex items-center justify-center min-h-[50vh]">
+      <p className="text-red-600">Error loading projects</p>
     </div>
   );
 
@@ -108,127 +141,194 @@ function ProjectDisplayPage() {
         />
       )}
       
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <Sparkles className="text-blue-600" size={32} />
-              <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
-                Discover Projects
-              </h1>
-            </div>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Find exciting projects that match your skills and interests
-            </p>
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <Sparkles className="text-blue-600" size={28} />
+            <h1 className="text-2xl font-bold text-gray-900">Discover Projects</h1>
           </div>
-
-          {/* Filter Section */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 mb-8 shadow-xl">
-            <div className="flex items-center gap-3 mb-4">
-              <Code className="text-blue-600" size={24} />
-              <h2 className="text-xl font-semibold text-gray-800">Technologies</h2>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-              {availableTechnologies.map((tech) => (
-                <button
-                  key={tech}
-                  onClick={() => handleTechnologySelect(tech)}
-                  className={`${
-                    selectedTech.includes(tech)
-                      ? "bg-blue-600 text-white ring-2 ring-blue-600 ring-offset-2"
-                      : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
-                  } px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 shadow-sm hover:shadow`}
-                >
-                  {tech}
-                </button>
+          
+          <div className="flex items-center gap-3">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+            >
+              {sortOptions.map(option => (
+                <option key={option.value} value={option.value}>{option.label}</option>
               ))}
-            </div>
-          </div>
+            </select>
 
-          {/* Projects Grid */}
-          <div className="grid gap-6">
-            {data && data.length > 0 ? (
-              data.map((project) => (
-                <div
-                  key={project._id}
-                  className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl transition-all duration-300 hover:shadow-2xl"
-                >
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h2 className="text-2xl font-bold text-gray-900 mb-2">{project.name}</h2>
-                      <p className="text-gray-600 leading-relaxed mb-4">{project.description}</p>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`p-1.5 rounded-lg border transition-all ${
+                showFilters 
+                  ? 'bg-blue-50 border-blue-200 text-blue-600' 
+                  : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <SlidersHorizontal size={20} />
+            </button>
+          </div>
+        </div>
+
+        {/* Search and Filters */}
+        <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
+          <form onSubmit={handleSearch} className="mb-4">
+            <div className="relative">
+              <input
+                type="text"
+                value={inputValue}
+                onChange={handleInputChange}
+                placeholder="Search projects..."
+                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+              />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+            </div>
+          </form>
+
+          {showFilters && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Code className="text-blue-600" size={20} />
+                <h2 className="font-medium text-gray-700">Technologies</h2>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {availableTechnologies.map((tech) => (
+                  <button
+                    key={tech}
+                    onClick={() => handleTechnologySelect(tech)}
+                    className={`${
+                      selectedTech.includes(tech)
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-50 text-gray-700 hover:bg-gray-100"
+                    } px-3 py-1.5 rounded-lg text-sm font-medium transition-colors`}
+                  >
+                    {tech}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Active Filters */}
+          {(selectedTech.length > 0 || searchQuery) && (
+            <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t">
+              {selectedTech.map(tech => (
+                <span key={tech} className="px-2 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium flex items-center gap-1">
+                  {tech}
+                  <button onClick={() => handleTechnologySelect(tech)} className="hover:text-blue-900">×</button>
+                </span>
+              ))}
+              {searchQuery && (
+                <span className="px-2 py-1 bg-purple-50 text-purple-700 rounded-lg text-sm font-medium flex items-center gap-1">
+                  Search: {searchQuery}
+                  <button
+                    onClick={() => {
+                      setSearchQuery("");
+                      setInputValue("");
+                    }}
+                    className="hover:text-purple-900"
+                  >
+                    ×
+                  </button>
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Projects Grid */}
+        <div className="grid gap-4">
+          {data && data.length > 0 ? (
+            data.map((project) => (
+              <div
+                key={project._id}
+                className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div className="flex justify-between items-start gap-4">
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-2 truncate">{project.name}</h2>
+                    <p className="text-gray-600 line-clamp-2 mb-4">{project.description}</p>
+                    
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {project.technologies?.map((tech) => (
+                        <span
+                          key={tech}
+                          className="px-2 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium"
+                        >
+                          {tech}
+                        </span>
+                      ))}
                     </div>
+
+                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <div className="flex items-center gap-1">
+                        <Users size={16} />
+                        <span>{project.applicants?.length || 0} applicants</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Calendar size={16} />
+                        <span>{new Date(project.createdAt).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col items-end gap-3">
                     <button
                       onClick={() => setSelectedProject(project)}
-                      className="p-2 hover:bg-blue-50 rounded-full transition-colors text-blue-600"
-                      title="View Project Details"
+                      className="p-1.5 hover:bg-blue-50 rounded-lg transition-colors text-blue-600"
+                      title="View Details"
                     >
-                      <Info size={24} />
+                      <Info size={20} />
                     </button>
-                  </div>
-                  
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    {project.technologies?.map((tech) => (
-                      <span
-                        key={tech}
-                        className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
-                      >
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Users size={20} />
-                      <span>{project.applicants?.length || 0} applicants</span>
-                    </div>
 
                     {!project.applicants?.includes(userId) && userId && (
                       <button
                         onClick={() => handleApply(project._id)}
-                        className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200 hover:transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
                       >
-                        Apply for Project
+                        Apply
                       </button>
                     )}
                   </div>
                 </div>
-              ))
-            ) : (
-              <div className="text-center py-12 bg-white/80 backdrop-blur-sm rounded-2xl">
-                <p className="text-gray-600 font-medium">No projects found matching your criteria.</p>
               </div>
-            )}
-          </div>
+            ))
+          ) : (
+            <div className="text-center py-8 bg-white rounded-xl">
+              <p className="text-gray-600">No projects found matching your criteria.</p>
+            </div>
+          )}
+        </div>
 
-          {/* Pagination */}
-          <div className="flex justify-between items-center mt-8 bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg">
-            <button
-              onClick={() => handlePageChange(page - 1)}
-              disabled={page <= 1}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-colors duration-200 ${
-                page <= 1
-                  ? "text-gray-400 cursor-not-allowed"
-                  : "text-blue-600 hover:bg-blue-50"
-              }`}
-            >
-              <ArrowLeftCircle size={20} />
-              <span className="font-medium">Previous</span>
-            </button>
-            
-            <span className="px-4 py-2 bg-blue-100 text-blue-700 rounded-xl font-medium">
-              Page {page}
-            </span>
-            
-            <button
-              onClick={() => handlePageChange(page + 1)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-blue-600 hover:bg-blue-50 transition-colors duration-200"
-            >
-              <span className="font-medium">Next</span>
-              <ArrowRightCircle size={20} />
-            </button>
-          </div>
+        {/* Pagination */}
+        <div className="flex justify-between items-center mt-6 bg-white rounded-xl p-3 shadow-sm">
+          <button
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page <= 1}
+            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${
+              page <= 1
+                ? "text-gray-400 cursor-not-allowed"
+                : "text-blue-600 hover:bg-blue-50"
+            }`}
+          >
+            <ArrowLeftCircle size={18} />
+            <span className="text-sm font-medium">Previous</span>
+          </button>
+          
+          <span className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium">
+            Page {page}
+          </span>
+          
+          <button
+            onClick={() => setPage(p => p + 1)}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
+          >
+            <span className="text-sm font-medium">Next</span>
+            <ArrowRightCircle size={18} />
+          </button>
         </div>
       </div>
     </>
