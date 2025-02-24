@@ -53,6 +53,7 @@ const userSchema = new mongoose.Schema(
 				endYear: Number,
 			},
 		],
+		ratings: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Rating' }],
 		connections: [
 			{
 				type: mongoose.Schema.Types.ObjectId,

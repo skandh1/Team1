@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { axiosInstance } from "../lib/axios";
 import { toast } from "react-hot-toast";
-import { ExternalLink, Eye, MessageSquare, ThumbsUp, Trash2, UserPlus } from "lucide-react";
+import { ClipboardCheck, ExternalLink, Eye, MessageSquare, ThumbsUp, Trash2, UserPlus } from "lucide-react";
 import { Link } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import { formatDistanceToNow } from "date-fns";
@@ -41,6 +41,8 @@ const NotificationsPage = () => {
 				return <MessageSquare className='text-green-500' />;
 			case "connectionAccepted":
 				return <UserPlus className='text-purple-500' />;
+			case "projectCompleted":
+				return <ClipboardCheck className='text-green-500' />;
 			case "selected":
 				return <UserPlus className='text-purple-800' />;
 			default:
@@ -92,7 +94,8 @@ const NotificationsPage = () => {
             selected you in their project
           </span>
         );
-      case "connectionRequest":
+			case "projectCompleted":
+				return <span>Your project has been completed</span>;
 			default:
 				return null;
 		}

@@ -10,7 +10,7 @@ const notificationSchema = new mongoose.Schema(
 		type: {
 			type: String,
 			required: true,
-			enum: ["like", "comment", "connectionAccepted", "selected", "applied"],
+			enum: ["like", "comment", "connectionAccepted", "selected", "applied", "projectCompleted", "projectRating"],
 		},
 		relatedUser: {
 			type: mongoose.Schema.Types.ObjectId,
@@ -19,6 +19,10 @@ const notificationSchema = new mongoose.Schema(
 		relatedPost: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: "Post",
+		},
+		relatedProject: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "Project",
 		},
 		read: {
 			type: Boolean,

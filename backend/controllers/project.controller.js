@@ -179,7 +179,6 @@ export const getProjects = async (req, res) => {
   }
 };
 
-
 export const applyToProject = async (req, res) => {
   try {
     // Ensure user is authenticated

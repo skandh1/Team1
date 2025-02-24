@@ -35,7 +35,7 @@ const ProjectApplicantsModal = ({ project, onClose }) => {
   });
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 flex z-10 items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b">
