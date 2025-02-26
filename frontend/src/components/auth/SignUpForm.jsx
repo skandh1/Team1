@@ -15,6 +15,7 @@ const SignUpForm = () => {
 	const { mutate: signUpMutation, isLoading } = useMutation({
 		mutationFn: async (data) => {
 			const res = await axiosInstance.post("/auth/signup", data);
+			toast.success(`Logged in successfully, Welcome ${name}`);
 			return res.data;
 		},
 		onSuccess: () => {
