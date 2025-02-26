@@ -89,7 +89,7 @@ const ChatComponent = () => {
 
   return (
     <div className="h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
-      <div className="max-w-7xl mx-auto h-5/6 bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden flex">
+      <div className="max-w-10xl mx-auto h-[90%] bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden flex">
         {/* Users Sidebar */}
         <div className="w-80 bg-white/90 border-r border-gray-200 flex flex-col">
           <div className="p-6 border-b border-gray-200">

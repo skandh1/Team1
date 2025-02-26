@@ -84,34 +84,45 @@ export const updateProfile = async (req, res) => {
 };
 
 
-
 export const getUserMetrics = async (req, res) => {
   try {
     const { username } = req.params;
-    const id = User.find({ username: username })._id;
-    // Get user's average rating
-    const ratings = await Rating.find({ reviewee: id });
-    const averageRating = ratings.length > 0
-      ? ratings.reduce((acc, curr) => acc + curr.value, 0) / ratings.length
-      : 0;
+    
+    // Find user by username
+    const user = await User.findOne({ username: username });
+    
+    if (!user) {
+        return res.status(404).json({ error: "User not found" });
+    }
 
-    // Get projects where user participated (selected candidates)
+    const userId = user._id; // Get the user ID
+
+    console.log(username, userId);
+
+    // Get user's average rating
+    const ratings = await Rating.find({ reviewee: userId });
+    const averageRating = ratings.length > 0
+        ? ratings.reduce((acc, curr) => acc + curr.value, 0) / ratings.length
+        : 0;
+
+    // Get projects where user participated
     const projectsParticipated = await Project.countDocuments({
-      'selectedCandidates': id
+        selectedApplicants: userId
     });
 
     // Get projects created by user
     const projectsCreated = await Project.countDocuments({
-      createdBy: id
+        createdBy: userId
     });
 
     res.json({
-      averageRating,
-      projectsParticipated,
-      projectsCreated
+        averageRating,
+        projectsParticipated,
+        projectsCreated
     });
-  } catch (error) {
-    console.error('Error fetching user metrics:', error);
-    res.status(500).json({ error: 'Failed to fetch user metrics' });
-  }
+} catch (error) {
+    console.error("Error fetching user metrics:", error);
+    res.status(500).json({ error: "Failed to fetch user metrics" });
+}
+
 };
