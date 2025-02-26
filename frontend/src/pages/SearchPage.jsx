@@ -123,7 +123,7 @@ const SearchComponent = () => {
                     <div className="flex items-center mt-4 pt-4 border-t border-gray-100">
                       <Users2 className="h-4 w-4 text-gray-400 mr-2" />
                       <span className="text-sm text-gray-500">
-                        {user.connections || 0} connections
+                        {user.connections.length || 0} connections
                       </span>
                     </div>
                   </div>
