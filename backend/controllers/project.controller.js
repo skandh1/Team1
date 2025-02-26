@@ -19,27 +19,22 @@ const ALLOWED_TECHNOLOGIES = [
 
 export const createProject = async (req, res) => {
   try {
-    // Ensure the user is authenticated
     if (!req.user) {
       return res.status(401).json({ message: "Unauthorized. Please log in." });
     }
 
-    const { name, description, technologies, timeframe, deadline, budget } =
-      req.body;
+    const { name, description, technologies, timeframe, startDate, endDate, peopleRequired } = req.body;
 
     // Check for required fields
-    if (!name || !description || !technologies || !timeframe || !deadline) {
+    if (!name || !description || !technologies || !startDate || !endDate || !peopleRequired) {
       return res.status(400).json({
-        message:
-          "All fields (name, description, technologies, timeframe, deadline) are required.",
+        message: "All fields (name, description, technologies, startDate, endDate, peopleRequired) are required.",
       });
     }
 
     // Ensure technologies are valid
     if (!Array.isArray(technologies) || technologies.length === 0) {
-      return res
-        .status(400)
-        .json({ message: "Technologies must be a non-empty array." });
+      return res.status(400).json({ message: "Technologies must be a non-empty array." });
     }
 
     const invalidTech = technologies.filter(
@@ -47,48 +42,42 @@ export const createProject = async (req, res) => {
     );
     if (invalidTech.length > 0) {
       return res.status(400).json({
-        message: `Invalid technologies: ${invalidTech.join(
-          ", "
-        )}. Allowed: ${ALLOWED_TECHNOLOGIES.join(", ")}`,
+        message: `Invalid technologies: ${invalidTech.join(", ")}. Allowed: ${ALLOWED_TECHNOLOGIES.join(", ")}`,
       });
     }
 
-    // Validate timeframe (must be a string like "2 weeks", "1 month", etc.)
-    if (typeof timeframe !== "string" || timeframe.trim() === "") {
+    // Validate dates
+    const startDateObj = new Date(startDate);
+    const endDateObj = new Date(endDate);
+
+    if (isNaN(startDateObj.getTime()) || isNaN(endDateObj.getTime())) {
       return res.status(400).json({
-        message:
-          "Timeframe must be a valid string (e.g., '2 weeks', '1 month').",
+        message: "Invalid date format. Please provide valid dates.",
       });
     }
 
-    // Validate deadline (should be a future date)
-    const deadlineDate = new Date(deadline);
-    if (isNaN(deadlineDate.getTime())) {
-      return res.status(400).json({
-        message: "Invalid deadline format. Please provide a valid date.",
-      });
-    }
-    if (deadlineDate < new Date()) {
-      return res
-        .status(400)
-        .json({ message: "Deadline must be a future date." });
+    if (startDateObj < new Date()) {
+      return res.status(400).json({ message: "Start date must be in the future." });
     }
 
-    // Validate budget (optional, but if provided, must be a positive number)
-    if (budget === undefined) {
-      return res.status(400).json({ message: "Budget shuld be a number" });
+    if (endDateObj <= startDateObj) {
+      return res.status(400).json({ message: "End date must be after start date." });
+    }
+
+    // Validate peopleRequired
+    if (!Number.isInteger(Number(peopleRequired)) || peopleRequired < 1) {
+      return res.status(400).json({ message: "Number of people required must be a positive integer." });
     }
 
     // Create and save project
     const project = new Project({
-      ...req.body,
       name,
       description,
       technologies,
-      timeframe,
-      deadline: deadlineDate,
-      budget: budget || 0, // Default to 0 if not provided
-      createdBy: req.user._id, // Set user ID from authentication middleware
+      startDate: startDateObj,
+      endDate: endDateObj,
+      peopleRequired,
+      createdBy: req.user._id,
     });
 
     await project.save();

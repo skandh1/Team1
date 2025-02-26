@@ -1,53 +1,55 @@
 import { Link } from "react-router-dom";
-import { 
-  X, 
-  Users, 
-  Calendar, 
-  Tag,
-  Clock, 
-  Globe,
-  MessageSquare,
-  ExternalLink
-} from "lucide-react";
+import { X, Users, Calendar, Code, ExternalLink } from "lucide-react";
 
 const ProjectDetailsModal = ({ project, onClose, user }) => {
   if (!project) return null;
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm z-50">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="flex justify-between items-center p-6 border-b">
-          <h2 className="text-2xl font-bold text-gray-900">{project.name}</h2>
+        <div className="flex justify-between items-center p-4 sm:p-6 border-b">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 line-clamp-1">
+            {project.name}
+          </h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            aria-label="Close modal"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
-          {/* Project Info */}
+        <div className="p-4 sm:p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
           <div className="space-y-6">
             {/* Description */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">About the Project</h3>
-              <p className="text-gray-600 leading-relaxed">{project.description}</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                About the Project
+              </h3>
+              <p className="text-gray-600 leading-relaxed">
+                {project.description}
+              </p>
             </div>
 
             {/* Creator Info */}
             <div className="bg-blue-50 rounded-xl p-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Project Creator</h3>
-              <Link 
+              <h3 className="text-sm font-medium text-gray-500 mb-3">
+                Project Creator
+              </h3>
+              <Link
                 to={`/profile/${user.username}`}
-                className="flex items-center gap-4 group"
+                className="flex items-center gap-3 group"
               >
                 <img
-                  src={project.creator?.avatar || `https://ui-avatars.com/api/?name=${user.name}`}
+                  src={
+                    project.creator?.avatar ||
+                    `https://ui-avatars.com/api/?name=${user.name}`
+                  }
                   alt={user.name}
-                  className="w-12 h-12 rounded-full"
+                  className="w-10 h-10 rounded-full"
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
@@ -56,49 +58,43 @@ const ProjectDetailsModal = ({ project, onClose, user }) => {
                     </h4>
                     <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
                   </div>
-                  <p className="text-sm text-gray-500">@{user.name}</p>
+                  <p className="text-sm text-gray-500">@{user.username}</p>
                 </div>
               </Link>
             </div>
 
             {/* Project Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div className="bg-gray-50 rounded-xl p-4">
                 <div className="flex items-center gap-2 text-gray-600 mb-1">
                   <Users className="w-4 h-4" />
-                  <span className="text-sm">Applicants</span>
+                  <span className="text-sm">Team Size</span>
                 </div>
-                <p className="text-2xl font-bold text-gray-900">{project.applicants?.length || 0}</p>
-              </div>
-              
-              <div className="bg-gray-50 rounded-xl p-4">
-                <div className="flex items-center gap-2 text-gray-600 mb-1">
-                  <Clock className="w-4 h-4" />
-                  <span className="text-sm">Duration</span>
-                </div>
-                <p className="text-2xl font-bold text-gray-900">{project.duration || "N/A"}</p>
+                <p className="text-xl font-bold text-gray-900">
+                  {project.peopleRequired} People
+                </p>
               </div>
 
               <div className="bg-gray-50 rounded-xl p-4">
                 <div className="flex items-center gap-2 text-gray-600 mb-1">
-                  <Globe className="w-4 h-4" />
-                  <span className="text-sm">Type</span>
+                  <Calendar className="w-4 h-4" />
+                  <span className="text-sm">Timeline</span>
                 </div>
-                <p className="text-2xl font-bold text-gray-900">{project.type || "Remote"}</p>
-              </div>
-
-              <div className="bg-gray-50 rounded-xl p-4">
-                <div className="flex items-center gap-2 text-gray-600 mb-1">
-                  <MessageSquare className="w-4 h-4" />
-                  <span className="text-sm">Communication</span>
-                </div>
-                <p className="text-2xl font-bold text-gray-900">{project.communication || "Discord"}</p>
+                <p className="text-sm font-medium text-gray-900">
+                  {new Date(project.startDate).toLocaleDateString()} -{" "}
+                  {new Date(project.endDate).toLocaleDateString()}
+                </p>
               </div>
             </div>
 
             {/* Technologies */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Technologies</h3>
+              <div className="flex items-center gap-2 mb-3">
+                <Code className="w-4 h-4 text-blue-500" />
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Required Technologies
+                </h3>
+              </div>
               <div className="flex flex-wrap gap-2">
                 {project.technologies?.map((tech) => (
                   <span
@@ -108,25 +104,6 @@ const ProjectDetailsModal = ({ project, onClose, user }) => {
                     {tech}
                   </span>
                 ))}
-              </div>
-            </div>
-
-            {/* Timeline */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Project Timeline</h3>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 text-sm">
-                  <Calendar className="w-4 h-4 text-gray-500" />
-                  <span className="text-gray-600">Created:</span>
-                  <span className="font-medium text-gray-900">
-                    {new Date(project.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <Clock className="w-4 h-4 text-gray-500" />
-                  <span className="text-gray-600">Expected Duration:</span>
-                  <span className="font-medium text-gray-900">{project.duration || "Not specified"}</span>
-                </div>
               </div>
             </div>
           </div>

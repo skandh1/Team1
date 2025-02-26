@@ -14,7 +14,7 @@ router.get("/", protectRoute, getUserNotifications);
 
 router.put("/:id/read", protectRoute, markNotificationAsRead);
 router.delete("/:id", protectRoute, deleteNotification);
-router.delete('/notifications', protectRoute, deleteAllNotifications);
+router.delete('/', protectRoute, deleteAllNotifications);
 router.put('/mark-all-read', protectRoute, markAllNotificationsAsRead);
 
 export default router;

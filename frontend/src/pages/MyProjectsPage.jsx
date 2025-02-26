@@ -262,13 +262,13 @@ function MyProjectsPage() {
                           <CheckCircle2 className="w-4 h-4" />
                           Mark Complete
                         </button>
-                        <button
+                        {/* <button
                           onClick={() => updateStatusMutation.mutate({ id: project._id, status: 'cancelled' })}
                           className="px-3 py-1.5 text-sm bg-red-100 text-red-800 rounded-lg hover:bg-red-200 transition-colors flex items-center gap-1.5"
                         >
                           <XCircle className="w-4 h-4" />
                           Cancel Project
-                        </button>
+                        </button> */}
                       </div>
                       
                       <div className="flex flex-col sm:flex-row gap-2">
