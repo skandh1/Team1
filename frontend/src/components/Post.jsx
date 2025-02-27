@@ -152,10 +152,10 @@ const Post = ({ post }) => {
             onClick={() => setShowComments(!showComments)}
             active={showComments}
           />
-          <PostAction
+          {/* <PostAction
             icon={<Share2 size={18} />}
             text="Share"
-          />
+          /> */}
         </div>
       </div>
 

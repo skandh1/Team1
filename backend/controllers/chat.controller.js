@@ -24,6 +24,7 @@ export const getChatToken = async (req, res) => {
     res.status(200).json({
       userId: user._id.toString(),
       username: user.name,
+      user: user,
       token,
       apiKey,
     });

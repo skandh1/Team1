@@ -8,7 +8,7 @@ const LoginPage = () => {
       {/* Left side - Image */}
       <div className="hidden lg:flex lg:w-1/2 relative">
         <img
-          src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&q=80"
+          src="/image2.avif"
           alt="Professional workspace"
           className="absolute inset-0 w-full h-full object-cover"
         />

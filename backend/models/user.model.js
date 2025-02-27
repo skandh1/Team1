@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema(
     },
     headline: {
       type: String,
-      default: "Linkedin User",
+      default: "Teamify User",
     },
     location: {
       type: String,

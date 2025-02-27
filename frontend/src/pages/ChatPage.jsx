@@ -1,5 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
-import { Chat, Channel, MessageList, MessageInput, Window } from "stream-chat-react";
+import {
+  Chat,
+  Channel,
+  MessageList,
+  MessageInput,
+  Window,
+} from "stream-chat-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation, useNavigate } from "react-router-dom";
 import { axiosInstance } from "../lib/axios";
@@ -13,7 +19,7 @@ import {
   UserPlus2,
   User,
   Menu,
-  X
+  X,
 } from "lucide-react";
 import "stream-chat-react/dist/css/v2/index.css";
 
@@ -38,7 +44,11 @@ const ChatComponent = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
 
-  const { data: users, isLoading: usersLoading, error: usersError } = useQuery({
+  const {
+    data: users,
+    isLoading: usersLoading,
+    error: usersError,
+  } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
       const response = await axiosInstance.get("/chat/users");
@@ -58,13 +68,14 @@ const ChatComponent = () => {
 
   const sortedUsers = useMemo(() => {
     if (!users) return [];
-    
-    const projectUsers = users.filter(user => user.isProjectMember);
-    const friendUsers = users.filter(user => !user.isProjectMember);
-    
-    const sortByMessageCount = (a, b) => (b.messageCount || 0) - (a.messageCount || 0);
-    
-    return chatType === "project" 
+
+    const projectUsers = users.filter((user) => user.isProjectMember);
+    const friendUsers = users.filter((user) => !user.isProjectMember);
+
+    const sortByMessageCount = (a, b) =>
+      (b.messageCount || 0) - (a.messageCount || 0);
+
+    return chatType === "project"
       ? projectUsers.sort(sortByMessageCount)
       : friendUsers.sort(sortByMessageCount);
   }, [users, chatType]);
@@ -77,12 +88,16 @@ const ChatComponent = () => {
         setIsInitializing(true);
         const response = await axiosInstance.get("/chat/token");
         const { token, userId, username, apiKey } = response.data;
-        
+
         if (!mounted) return;
 
         setCurrentUser({ _id: userId, name: username });
-        
-        const chatClient = await chatClientService.initializeClient(apiKey, userId, token);
+
+        const chatClient = await chatClientService.initializeClient(
+          apiKey,
+          userId,
+          token
+        );
         if (!mounted) {
           chatClient.disconnectUser();
           return;
@@ -150,20 +165,27 @@ const ChatComponent = () => {
           <div className="text-red-500 mb-3">
             <Users2 className="w-12 h-12 mx-auto" />
           </div>
-          <h3 className="text-xl font-semibold text-red-600 mb-2">Unable to Load Users</h3>
-          <p className="text-gray-600">Please try again later or contact support if the issue persists.</p>
+          <h3 className="text-xl font-semibold text-red-600 mb-2">
+            Unable to Load Users
+          </h3>
+          <p className="text-gray-600">
+            Please try again later or contact support if the issue persists.
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-2 sm:p-6">
-      <div className="max-w-7xl mx-auto h-[98vh] bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden flex relative">
+    <div className="h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-2 sm:p-4">
+      <div
+        className="max-w-7xl mx-auto h-full bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden flex relative"
+        style={{ height: "calc(100% - 5rem)" }}
+      >
         {/* Mobile Toggle Button */}
         <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="md:hidden absolute top-4 right-4 z-50 p-2 bg-white rounded-lg shadow-md"
+          className="md:hidden absolute top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-md"
         >
           {isSidebarOpen ? (
             <X className="w-6 h-6 text-gray-600" />
@@ -173,13 +195,15 @@ const ChatComponent = () => {
         </button>
 
         {/* Users Sidebar */}
-        <div className={`
+        <div
+          className={`
           w-full md:w-80 bg-white/90 border-r border-gray-200 flex flex-col
-          ${isSidebarOpen ? 'block' : 'hidden'} md:block
+          ${isSidebarOpen ? "block" : "hidden"} md:block
           absolute md:relative z-40 h-full
-        `}>
+        `}
+        >
           {/* Chat Type Selector */}
-          <div className="p-4 sm:p-6 border-b border-gray-200">
+          <div className="p-4 border-b border-gray-200">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <MessageSquare className="w-6 h-6 text-blue-600" />
@@ -191,7 +215,7 @@ const ChatComponent = () => {
             <div className="flex gap-2 p-1 bg-gray-100 rounded-xl">
               <button
                 onClick={() => setChatType("project")}
-                className={`flex-1 py-2 px-3 sm:px-4 rounded-lg flex items-center justify-center gap-2 transition-all ${
+                className={`flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition-all ${
                   chatType === "project"
                     ? "bg-white text-blue-700 shadow-sm"
                     : "text-gray-600 hover:text-gray-900"
@@ -202,7 +226,7 @@ const ChatComponent = () => {
               </button>
               <button
                 onClick={() => setChatType("friend")}
-                className={`flex-1 py-2 px-3 sm:px-4 rounded-lg flex items-center justify-center gap-2 transition-all ${
+                className={`flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition-all ${
                   chatType === "friend"
                     ? "bg-white text-blue-700 shadow-sm"
                     : "text-gray-600 hover:text-gray-900"
@@ -213,9 +237,25 @@ const ChatComponent = () => {
               </button>
             </div>
           </div>
-          
+
+          {/* Search Bar */}
+          {/* <div className="px-4 py-3 border-b border-gray-200">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search conversations..."
+                className="w-full py-2 pl-3 pr-10 bg-gray-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+              />
+              <div className="absolute right-3 top-2.5 text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+            </div>
+          </div> */}
+
           {/* Users List */}
-          <div className="overflow-y-auto flex-1 py-4">
+          <div className="overflow-y-auto flex-1">
             {sortedUsers.length === 0 ? (
               <div className="text-center p-6">
                 <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
@@ -226,10 +266,11 @@ const ChatComponent = () => {
                   )}
                 </div>
                 <h3 className="text-gray-900 font-medium mb-1">
-                  No {chatType === "project" ? "Project Members" : "Friends"} Yet
+                  No {chatType === "project" ? "Project Members" : "Friends"}{" "}
+                  Yet
                 </h3>
                 <p className="text-sm text-gray-500">
-                  {chatType === "project" 
+                  {chatType === "project"
                     ? "Join or create a project to chat with team members"
                     : "Connect with other users to start chatting"}
                 </p>
@@ -239,42 +280,57 @@ const ChatComponent = () => {
                 <button
                   key={user._id}
                   onClick={() => handleUserSelect(user)}
-                  className={`w-full flex items-center px-4 sm:px-6 py-4 hover:bg-blue-50 transition-all duration-200
-                    ${selectedUserId === user._id ? 'bg-blue-100' : ''}
+                  className={`w-full flex items-center px-4 py-3 hover:bg-blue-50 transition-all duration-200 border-b-4 border-blue-200 rounded
+                    ${selectedUserId === user._id ? "bg-blue-100" : ""}
                   `}
                 >
                   <div className="relative">
-                    <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
-                      <UserIcon className="w-5 sm:w-6 h-5 sm:h-6 text-white" />
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0 ">
+                      <img
+                        src={user.profilePicture || "/avatar.png"}
+                        alt={user.name}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
                     </div>
                     {user.messageCount > 0 && (
                       <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
-                        <span className="text-xs text-white font-medium">{user.messageCount}</span>
+                        <span className="text-xs text-white font-medium">
+                          {user.messageCount}
+                        </span>
                       </div>
                     )}
-                    <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-white flex items-center justify-center">
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-white flex items-center justify-center">
                       {user.isProjectMember ? (
-                        <Briefcase className="w-3 h-3 text-blue-600" />
+                        <Briefcase className="w-2.5 h-2.5 text-blue-600" />
                       ) : (
-                        <User className="w-3 h-3 text-green-600" />
+                        <UserIcon className="w-2.5 h-2.5 text-green-600" />
                       )}
                     </div>
                   </div>
-                  <div className="ml-3 sm:ml-4 text-left flex-1 min-w-0">
+                  <div className="ml-3 text-left flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <p className={`font-medium truncate ${
-                        selectedUserId === user._id ? 'text-blue-900' : 'text-gray-900'
-                      }`}>
+                      <p
+                        className={`font-medium truncate ${
+                          selectedUserId === user._id
+                            ? "text-blue-900"
+                            : "text-gray-900"
+                        }`}
+                      >
                         {user.name}
                       </p>
                       {user.lastMessageTime && (
                         <span className="text-xs text-gray-500 ml-2">
-                          {new Date(user.lastMessageTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {new Date(user.lastMessageTime).toLocaleTimeString(
+                            [],
+                            { hour: "2-digit", minute: "2-digit" }
+                          )}
                         </span>
                       )}
                     </div>
                     {user.lastMessage && (
-                      <p className="text-sm text-gray-500 truncate">{user.lastMessage}</p>
+                      <p className="text-sm text-gray-500 truncate">
+                        {user.lastMessage}
+                      </p>
                     )}
                   </div>
                 </button>
@@ -284,17 +340,19 @@ const ChatComponent = () => {
         </div>
 
         {/* Chat Area */}
-        <div className={`
+        <div
+          className={`
           flex-1 flex flex-col bg-white/90
-          ${!isSidebarOpen || !activeChannel ? 'block' : 'hidden'} md:block
-        `}>
+          ${!isSidebarOpen || !activeChannel ? "block" : "hidden"} md:block
+        `}
+        >
           {client && (
             <Chat client={client} theme="messaging light">
               {activeChannel ? (
                 <Channel channel={activeChannel}>
                   <Window>
                     <div className="flex flex-col h-full">
-                      <div className="p-4 sm:p-6 border-b border-gray-200">
+                      <div className="p-4 border-b border-gray-200">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
                             <UserIcon className="w-5 h-5 text-white" />
@@ -304,7 +362,9 @@ const ChatComponent = () => {
                               {activeChannel.data?.name || "Chat"}
                             </h3>
                             <p className="text-sm text-gray-500">
-                              {chatType === "project" ? "Project Member" : "Friend"}
+                              {chatType === "project"
+                                ? "Project Member"
+                                : "Friend"}
                             </p>
                           </div>
                         </div>
@@ -313,12 +373,12 @@ const ChatComponent = () => {
                         <LoadingSpinner />
                       ) : (
                         <>
-                          <MessageList 
-                            className="flex-1 px-4 sm:px-6 py-4"
+                          <MessageList
+                            className="flex-1 px-4 py-4"
                             messageActions={["edit", "delete", "react"]}
                             messageAlignment="right"
                           />
-                          <div className="p-4 border-t border-gray-200">
+                          <div className="p-3 border-t border-gray-200">
                             <MessageInput className="px-4 py-3 rounded-xl bg-gray-50 focus-within:bg-white transition-colors duration-200" />
                           </div>
                         </>
@@ -327,10 +387,17 @@ const ChatComponent = () => {
                   </Window>
                 </Channel>
               ) : (
-                <div className="h-full flex flex-col items-center justify-center text-gray-400">
-                  <MessageSquare className="w-16 h-16 mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">No Chat Selected</h3>
-                  <p className="text-gray-500">Choose a contact to start messaging</p>
+                <div className="h-full flex flex-col items-center justify-center text-gray-400 p-4">
+                  <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                    <MessageSquare className="w-10 h-10 text-gray-300" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2 text-gray-700">
+                    Select a Conversation
+                  </h3>
+                  <p className="text-gray-500 text-center max-w-md">
+                    Choose a contact from the sidebar to start messaging or
+                    continue an existing conversation
+                  </p>
                 </div>
               )}
             </Chat>
