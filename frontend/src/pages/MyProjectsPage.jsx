@@ -62,9 +62,10 @@ function MyProjectsPage() {
     onSuccess: (_, variables) => {
       toast.success("Project status updated successfully");
       queryClient.invalidateQueries(["myProjects"]);
+      console.log(variables, data )
       if (variables.status === 'Completed') {
         const project = data.find((p) => p._id === variables.id);
-        if (project?.applicants?.length > 0) {
+        if (project?.selectedApplicants?.length > 0) {
           setRatingProject(project);
         }
       }
@@ -195,7 +196,7 @@ function MyProjectsPage() {
                   key={project._id} 
                   className={`
                     bg-white rounded-xl shadow-sm border transition-all duration-200
-                    ${project.isEnabled ? 'border-gray-200' : 'border-gray-400 bg-gray-300 opacity-90'}
+                    ${project.isEnabled ? 'border-gray-200' : 'border-gray-500 bg-gray-300 opacity-60'}
                     hover:shadow-md hover:border-blue-200
                   `}
                 >

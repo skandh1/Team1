@@ -1,20 +1,25 @@
 import { useEffect, useState } from "react";
 import { axiosInstance } from "../lib/axios";
-import { 
-  Loader, 
-  ClipboardList, 
-  CheckCircle2, 
+import {
+  Loader,
+  ClipboardList,
+  CheckCircle2,
   Clock3,
   XCircle,
   BarChart3,
   Calendar,
-  RefreshCcw
+  RefreshCcw,
+  Loader2,
+  Eye,
 } from "lucide-react";
+import ProjectDetails from "../components/ProjectDetails";
+import toast from "react-hot-toast";
 
 const AppliedProjects = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
 
   const fetchAppliedProjects = async () => {
     try {
@@ -33,20 +38,40 @@ const AppliedProjects = () => {
     fetchAppliedProjects();
   }, []);
 
-  const stats = {
-    total: projects.length,
-    selected: projects.filter(p => p.isSelected).length,
-    pending: projects.filter(p => !p.isSelected).length
+  const handleViewProject = (project) => {
+    setSelectedProject(project);
   };
 
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
-      <div className="flex flex-col items-center gap-4">
-        <Loader className="animate-spin text-blue-600" size={48} />
-        <p className="text-blue-600 font-medium">Loading your applications...</p>
+  const handleLeaveProject = async (projectId) => {
+    try {
+      await axiosInstance.post("/appliedProjects/leave", { projectId });
+      // Remove project from the list
+      setProjects(projects.filter(p => p._id !== projectId));
+      // Close the modal
+      setSelectedProject(null);
+    } catch (error) {
+      console.error("Error leaving project:", error);
+      throw error;
+    }
+  };
+
+  const stats = {
+    total: projects.length,
+    selected: projects.filter((p) => p.isSelected).length,
+    pending: projects.filter((p) => !p.isSelected).length,
+  };
+
+  if (loading)
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+        <div className="h-full flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4 text-blue-600">
+            <Loader2 className="w-12 h-12 animate-spin" />
+            <p className="text-lg font-medium">Loading messages...</p>
+          </div>
+        </div>
       </div>
-    </div>
-  );
+    );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8 px-4 sm:px-6 lg:px-8">
@@ -98,7 +123,10 @@ const AppliedProjects = () => {
             disabled={refreshing}
             className="flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur-sm rounded-lg text-blue-600 hover:bg-blue-50 transition-colors shadow-sm"
           >
-            <RefreshCcw size={18} className={refreshing ? "animate-spin" : ""} />
+            <RefreshCcw
+              size={18}
+              className={refreshing ? "animate-spin" : ""}
+            />
             <span className="font-medium">Refresh</span>
           </button>
         </div>
@@ -107,9 +135,12 @@ const AppliedProjects = () => {
         {projects.length === 0 ? (
           <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-12 text-center shadow-xl">
             <XCircle size={48} className="text-gray-400 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">No Applications Yet</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              No Applications Yet
+            </h2>
             <p className="text-gray-600 max-w-md mx-auto">
-              You haven't applied to any projects yet. Start exploring available projects and submit your applications!
+              You haven't applied to any projects yet. Start exploring available
+              projects and submit your applications!
             </p>
           </div>
         ) : (
@@ -122,12 +153,16 @@ const AppliedProjects = () => {
                 <div className="flex items-start justify-between gap-6">
                   <div className="flex-1">
                     <div className="flex items-center gap-4 mb-3">
-                      <h2 className="text-xl font-bold text-gray-900">{project.name}</h2>
-                      <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
-                        project.isSelected 
-                          ? "bg-green-100 text-green-700" 
-                          : "bg-amber-100 text-amber-700"
-                      }`}>
+                      <h2 className="text-xl font-bold text-gray-900">
+                        {project.name}
+                      </h2>
+                      <div
+                        className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
+                          project.isSelected
+                            ? "bg-green-100 text-green-700"
+                            : "bg-amber-100 text-amber-700"
+                        }`}
+                      >
                         {project.isSelected ? (
                           <>
                             <CheckCircle2 size={16} />
@@ -141,8 +176,10 @@ const AppliedProjects = () => {
                         )}
                       </div>
                     </div>
-                    <p className="text-gray-600 leading-relaxed mb-4">{project.description}</p>
-                    
+                    <p className="text-gray-600 leading-relaxed mb-4">
+                      {project.description}
+                    </p>
+
                     {project.technologies && (
                       <div className="flex flex-wrap gap-2 mb-4">
                         {project.technologies.map((tech) => (
@@ -155,14 +192,30 @@ const AppliedProjects = () => {
                         ))}
                       </div>
                     )}
-                    
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <Calendar size={16} />
-                      <span>Applied on {new Date(project.createdAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}</span>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <Calendar size={16} />
+                        <span>
+                          Applied on{" "}
+                          {new Date(project.createdAt).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            }
+                          )}
+                        </span>
+                      </div>
+                      
+                      <button
+                        onClick={() => handleViewProject(project)}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                      >
+                        <Eye size={18} />
+                        <span className="font-medium">View Details</span>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -171,6 +224,15 @@ const AppliedProjects = () => {
           </div>
         )}
       </div>
+
+      {/* Project Details Modal */}
+      {selectedProject && (
+        <ProjectDetails 
+          project={selectedProject} 
+          onLeaveProject={handleLeaveProject}
+          onClose={() => setSelectedProject(null)}
+        />
+      )}
     </div>
   );
 };

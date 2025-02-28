@@ -2,23 +2,33 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
-import { 
-  Code, 
-  ArrowLeftCircle, 
-  ArrowRightCircle, 
-  Loader, 
+import {
+  Code,
+  ArrowLeftCircle,
+  ArrowRightCircle,
+  Loader,
   Sparkles,
   Info,
   Users,
   Search,
   SlidersHorizontal,
-  Calendar
+  Calendar,
+  Loader2,
 } from "lucide-react";
 import ProjectDetailsModal from "../components/ProjectDetailsModal";
 
 const availableTechnologies = [
-  "React", "Node.js", "Express", "MongoDB", "PostgreSQL",
-  "Python", "Django", "Angular", "Vue.js", "Java", "Spring Boot"
+  "React",
+  "Node.js",
+  "Express",
+  "MongoDB",
+  "PostgreSQL",
+  "Python",
+  "Django",
+  "Angular",
+  "Vue.js",
+  "Java",
+  "Spring Boot",
 ];
 
 const sortOptions = [
@@ -63,7 +73,8 @@ function ProjectDisplayPage() {
     queryFn: async () => {
       const response = await axiosInstance.get("/project", {
         params: {
-          technologies: selectedTech.length > 0 ? selectedTech.join(",") : undefined,
+          technologies:
+            selectedTech.length > 0 ? selectedTech.join(",") : undefined,
           page,
           search: searchQuery,
           sortBy,
@@ -71,7 +82,7 @@ function ProjectDisplayPage() {
       });
 
       if (response.data && Array.isArray(response.data.projects)) {
-        return response.data.projects.map(project => ({
+        return response.data.projects.map((project) => ({
           ...project,
           applicants: project.applicants || [],
         }));
@@ -84,8 +95,8 @@ function ProjectDisplayPage() {
   });
 
   const handleTechnologySelect = (tech) => {
-    setSelectedTech(prev =>
-      prev.includes(tech) ? prev.filter(t => t !== tech) : [...prev, tech]
+    setSelectedTech((prev) =>
+      prev.includes(tech) ? prev.filter((t) => t !== tech) : [...prev, tech]
     );
     setPage(1);
   };
@@ -94,7 +105,7 @@ function ProjectDisplayPage() {
     const newValue = event.target.value;
     setInputValue(newValue);
     if (timeoutId) clearTimeout(timeoutId);
-    
+
     const newTimeoutId = setTimeout(() => {
       setSearchQuery(newValue.trim());
       setPage(1);
@@ -119,17 +130,24 @@ function ProjectDisplayPage() {
     }
   };
 
-  if (isLoading || !userId) return (
-    <div className="flex items-center justify-center min-h-[50vh]">
-      <Loader className="animate-spin text-blue-600" size={40} />
-    </div>
-  );
-  
-  if (isError) return (
-    <div className="flex items-center justify-center min-h-[50vh]">
-      <p className="text-red-600">Error loading projects</p>
-    </div>
-  );
+  if (isLoading || !userId)
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+        <div className="h-full flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4 text-blue-600">
+            <Loader2 className="w-12 h-12 animate-spin" />
+            <p className="text-lg font-medium">Loading messages...</p>
+          </div>
+        </div>
+      </div>
+    );
+
+  if (isError)
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <p className="text-red-600">Error loading projects</p>
+      </div>
+    );
 
   return (
     <>
@@ -140,32 +158,36 @@ function ProjectDisplayPage() {
           onClose={() => setSelectedProject(null)}
         />
       )}
-      
+
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <Sparkles className="text-blue-600" size={28} />
-            <h1 className="text-2xl font-bold text-gray-900">Discover Projects</h1>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Discover Projects
+            </h1>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
               className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
             >
-              {sortOptions.map(option => (
-                <option key={option.value} value={option.value}>{option.label}</option>
+              {sortOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
               ))}
             </select>
 
             <button
               onClick={() => setShowFilters(!showFilters)}
               className={`p-1.5 rounded-lg border transition-all ${
-                showFilters 
-                  ? 'bg-blue-50 border-blue-200 text-blue-600' 
-                  : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                showFilters
+                  ? "bg-blue-50 border-blue-200 text-blue-600"
+                  : "border-gray-200 text-gray-600 hover:bg-gray-50"
               }`}
             >
               <SlidersHorizontal size={20} />
@@ -184,7 +206,10 @@ function ProjectDisplayPage() {
                 placeholder="Search projects..."
                 className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
               />
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                size={20}
+              />
             </div>
           </form>
 
@@ -215,10 +240,18 @@ function ProjectDisplayPage() {
           {/* Active Filters */}
           {(selectedTech.length > 0 || searchQuery) && (
             <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t">
-              {selectedTech.map(tech => (
-                <span key={tech} className="px-2 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium flex items-center gap-1">
+              {selectedTech.map((tech) => (
+                <span
+                  key={tech}
+                  className="px-2 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium flex items-center gap-1"
+                >
                   {tech}
-                  <button onClick={() => handleTechnologySelect(tech)} className="hover:text-blue-900">×</button>
+                  <button
+                    onClick={() => handleTechnologySelect(tech)}
+                    className="hover:text-blue-900"
+                  >
+                    ×
+                  </button>
                 </span>
               ))}
               {searchQuery && (
@@ -249,9 +282,13 @@ function ProjectDisplayPage() {
               >
                 <div className="flex justify-between items-start gap-4">
                   <div className="flex-1 min-w-0">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-2 truncate">{project.name}</h2>
-                    <p className="text-gray-600 line-clamp-2 mb-4">{project.description}</p>
-                    
+                    <h2 className="text-xl font-semibold text-gray-900 mb-2 truncate">
+                      {project.name}
+                    </h2>
+                    <p className="text-gray-600 line-clamp-2 mb-4">
+                      {project.description}
+                    </p>
+
                     <div className="flex flex-wrap gap-2 mb-4">
                       {project.technologies?.map((tech) => (
                         <span
@@ -266,11 +303,15 @@ function ProjectDisplayPage() {
                     <div className="flex items-center gap-4 text-sm text-gray-500">
                       <div className="flex items-center gap-1">
                         <Users size={16} />
-                        <span>{project.applicants?.length || 0} applicants</span>
+                        <span>
+                          {project.applicants?.length || 0} applicants
+                        </span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Calendar size={16} />
-                        <span>{new Date(project.createdAt).toLocaleDateString()}</span>
+                        <span>
+                          {new Date(project.createdAt).toLocaleDateString()}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -298,7 +339,9 @@ function ProjectDisplayPage() {
             ))
           ) : (
             <div className="text-center py-8 bg-white rounded-xl">
-              <p className="text-gray-600">No projects found matching your criteria.</p>
+              <p className="text-gray-600">
+                No projects found matching your criteria.
+              </p>
             </div>
           )}
         </div>
@@ -306,7 +349,7 @@ function ProjectDisplayPage() {
         {/* Pagination */}
         <div className="flex justify-between items-center mt-6 bg-white rounded-xl p-3 shadow-sm">
           <button
-            onClick={() => setPage(p => Math.max(1, p - 1))}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
             className={`flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${
               page <= 1
@@ -317,13 +360,13 @@ function ProjectDisplayPage() {
             <ArrowLeftCircle size={18} />
             <span className="text-sm font-medium">Previous</span>
           </button>
-          
+
           <span className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium">
             Page {page}
           </span>
-          
+
           <button
-            onClick={() => setPage(p => p + 1)}
+            onClick={() => setPage((p) => p + 1)}
             className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
           >
             <span className="text-sm font-medium">Next</span>

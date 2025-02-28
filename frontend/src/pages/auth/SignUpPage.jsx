@@ -8,7 +8,7 @@ const SignUpPage = () => {
       {/* Left side - Image */}
       <div className="hidden lg:flex lg:w-1/2 relative">
         <img
-          src="/image1.avif"
+          src="/image1.jpg"
           alt="Team collaboration"
           className="absolute inset-0 w-full h-full object-cover"
         />

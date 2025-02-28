@@ -8,7 +8,7 @@ const LoginPage = () => {
       {/* Left side - Image */}
       <div className="hidden lg:flex lg:w-1/2 relative">
         <img
-          src="/image2.avif"
+          src="/image2.jpg"
           alt="Professional workspace"
           className="absolute inset-0 w-full h-full object-cover"
         />
