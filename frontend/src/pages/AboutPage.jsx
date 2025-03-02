@@ -213,7 +213,7 @@ function AboutPage() {
               <ArrowRight className="ml-2 w-5 h-5" />
             </Link>
             <Link
-              to="/projectdisplay"
+              to="/login"
               className="inline-flex items-center px-8 py-4 rounded-xl bg-white text-gray-800 font-semibold text-lg hover:shadow-lg hover:scale-105 transition-all duration-200"
             >
               Explore Projects
