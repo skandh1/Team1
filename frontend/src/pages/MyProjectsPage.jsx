@@ -56,6 +56,8 @@ function MyProjectsPage() {
     onError: () => toast.error("Failed to update project status"),
   });
 
+  
+
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status }) => 
       axiosInstance.patch(`/editProject/status/${id}`, { status }),
@@ -256,13 +258,14 @@ function MyProjectsPage() {
 
                     <div className="mt-6 space-y-4">
                       <div className="flex flex-wrap gap-2">
-                        <button
-                          onClick={() => updateStatusMutation.mutate({ id: project._id, status: 'Completed' })}
-                          className="px-3 py-1.5 text-sm bg-green-100 text-green-800 rounded-lg hover:bg-green-200 transition-colors flex items-center gap-1.5"
-                        >
-                          <CheckCircle2 className="w-4 h-4" />
-                          Mark Complete
-                        </button>
+                        {project.status !== "Completed" &&
+                          <button
+                            onClick={() => updateStatusMutation.mutate({ id: project._id, status: 'Completed' })}
+                            className="px-3 py-1.5 text-sm bg-green-100 text-green-800 rounded-lg hover:bg-green-200 transition-colors flex items-center gap-1.5"
+                          >
+                            <CheckCircle2 className="w-4 h-4" />
+                            Mark Complete
+                          </button>}
                         {/* <button
                           onClick={() => updateStatusMutation.mutate({ id: project._id, status: 'cancelled' })}
                           className="px-3 py-1.5 text-sm bg-red-100 text-red-800 rounded-lg hover:bg-red-200 transition-colors flex items-center gap-1.5"

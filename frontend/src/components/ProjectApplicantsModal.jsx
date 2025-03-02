@@ -10,12 +10,29 @@ const ProjectApplicantsModal = ({ project, onClose }) => {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["projectApplicants", project._id],
     queryFn: async () => {
-      const response = await axiosInstance.get(`/editproject/applicants/${project._id}`);
+      const response = await axiosInstance.get(
+        `/editproject/applicants/${project._id}`
+      );
       return response.data;
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || "Failed to fetch applicants.");
+      toast.error(
+        error.response?.data?.message || "Failed to fetch applicants."
+      );
     },
+  });
+
+  const { mutate: handleRemoveApplicant } = useMutation({
+    mutationFn: async (applicantId) =>
+      axiosInstance.post(`/editProject/remove-applicant`, {
+        projectId: project._id,
+        applicantId,
+      }),
+    onSuccess: () => {
+      toast.success("user Removed successfully");
+      queryClient.invalidateQueries(["myProjects"]);
+    },
+    onError: () => toast.error("Failed to update project status"),
   });
 
   const { mutate: selectApplicant, isLoading: isSelecting } = useMutation({
@@ -30,12 +47,16 @@ const ProjectApplicantsModal = ({ project, onClose }) => {
       queryClient.invalidateQueries(["projectApplicants", project._id]);
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || "Failed to select applicant.");
+      toast.error(
+        error.response?.data?.message || "Failed to select applicant."
+      );
     },
   });
 
   return (
-    <div className="fixed inset-0 flex z-10 items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+    <div
+      className={`fixed inset-0 flex z-10 items-center justify-center bg-black/50 p-4 backdrop-blur-sm`}
+    >
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden mt-24">
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b">
@@ -53,11 +74,19 @@ const ProjectApplicantsModal = ({ project, onClose }) => {
           </button>
         </div>
 
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+        <div
+          className={`p-6 overflow-y-auto max-h-[calc(90vh-80px)] ${
+            project.status === "Completed"
+              ? "pointer-events-none cursor-none opacity-50"
+              : ""
+          }`}
+        >
           {/* Pending Applicants Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <h3 className="text-lg font-semibold text-gray-900">Pending Applications</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Pending Applications
+              </h3>
               <span className="bg-blue-100 text-blue-700 text-sm px-2 py-0.5 rounded-full">
                 {data?.applicants?.length || 0}
               </span>
@@ -87,13 +116,20 @@ const ProjectApplicantsModal = ({ project, onClose }) => {
                       className="flex items-center gap-3 flex-1"
                     >
                       <img
-                        src={applicant.avatar || `https://ui-avatars.com/api/?name=${applicant.name}`}
+                        src={
+                          applicant.avatar ||
+                          `https://ui-avatars.com/api/?name=${applicant.name}`
+                        }
                         alt={applicant.name}
                         className="w-10 h-10 rounded-full"
                       />
                       <div>
-                        <h4 className="font-medium text-gray-900">{applicant.name}</h4>
-                        <p className="text-sm text-gray-500">{applicant.email}</p>
+                        <h4 className="font-medium text-gray-900">
+                          {applicant.name}
+                        </h4>
+                        <p className="text-sm text-gray-500">
+                          {applicant.email}
+                        </p>
                       </div>
                     </Link>
                     <button
@@ -113,7 +149,9 @@ const ProjectApplicantsModal = ({ project, onClose }) => {
           {/* Selected Applicants Section */}
           <div className="mt-8 space-y-4">
             <div className="flex items-center gap-2">
-              <h3 className="text-lg font-semibold text-gray-900">Selected Team Members</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Selected Team Members
+              </h3>
               <span className="bg-green-100 text-green-700 text-sm px-2 py-0.5 rounded-full">
                 {data?.selectedApplicants?.length || 0}
               </span>
@@ -126,31 +164,46 @@ const ProjectApplicantsModal = ({ project, onClose }) => {
             ) : (
               <div className="grid gap-4">
                 {data?.selectedApplicants?.map((user) => (
-                  <Link
-                    to={`/profile/${user.username}`}
+                  <div
                     key={user._id}
-                    className="block"
+                    className="p-4 bg-white border border-gray-200 rounded-lg hover:border-blue-500 transition-colors flex items-center justify-between"
                   >
-                    <div className="p-4 bg-white border border-gray-200 rounded-lg hover:border-blue-500 transition-colors">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={user.avatar || `https://ui-avatars.com/api/?name=${user.name}`}
-                          alt={user.name}
-                          className="w-12 h-12 rounded-full"
-                        />
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-medium text-gray-900">{user.name}</h4>
-                            <UserCheck className="w-4 h-4 text-green-600" />
-                          </div>
-                          <p className="text-sm text-gray-500">@{user.username}</p>
-                          {user.bio && (
-                            <p className="text-sm text-gray-600 mt-2 line-clamp-2">{user.bio}</p>
-                          )}
+                    <Link
+                      to={`/profile/${user.username}`}
+                      className="flex items-center gap-3"
+                    >
+                      <img
+                        src={
+                          user.avatar ||
+                          `https://ui-avatars.com/api/?name=${user.name}`
+                        }
+                        alt={user.name}
+                        className="w-12 h-12 rounded-full"
+                      />
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-medium text-gray-900">
+                            {user.name}
+                          </h4>
+                          <UserCheck className="w-4 h-4 text-green-600" />
                         </div>
+                        <p className="text-sm text-gray-500">
+                          @{user.username}
+                        </p>
+                        {user.bio && (
+                          <p className="text-sm text-gray-600 mt-2 line-clamp-2">
+                            {user.bio}
+                          </p>
+                        )}
                       </div>
-                    </div>
-                  </Link>
+                    </Link>
+                    <button
+                      className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                      onClick={() => handleRemoveApplicant(user._id)}
+                    >
+                      Remove Applicant
+                    </button>
+                  </div>
                 ))}
               </div>
             )}

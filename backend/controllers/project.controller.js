@@ -110,7 +110,11 @@ export const getProjects = async (req, res) => {
     const appliedProjects = user?.appliedProject || [];
 
     // Build query
-    let query = { _id: { $nin: appliedProjects } }; // Exclude applied projects
+    let query = {
+      _id: { $nin: appliedProjects },
+      status: "Open", 
+      createdBy: { $ne: userId }
+    }; // Exclude applied projects
 
     // Add technology filter
     if (technologies) {
@@ -124,7 +128,6 @@ export const getProjects = async (req, res) => {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
         { description: { $regex: search, $options: 'i' } },
-        { status : 'open'}
       ];
     }
 
@@ -245,3 +248,5 @@ export const getSingleProject = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch project" });
   }
 };
+
+

@@ -315,3 +315,70 @@ export const getProjectRatings = async (req, res) => {
     });
   }
 };
+
+export const removeApplicant = async (req, res) => {
+  try {
+    const { projectId, applicantId } = req.body;
+    console.log("working0")
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    const applicant = project.selectedApplicants.find(
+      (app) => app.toString() === applicantId
+    );
+    if (!applicant) {
+      return res
+        .status(400)
+        .json({ message: "User not in the project" });
+    }
+    console.log("working1")
+    const user = await User.findById(applicantId);
+    if (!user) {
+      return res.status(404).json({ message: "Applicant not found" });
+    }
+    // Use created_by
+    const newNotification = new Notification({
+      recipient: user._id, // Use created_by
+      type: "Removed",
+      relatedUser: project.createdBy, // Project ID goes in relatedPost
+    });
+    await newNotification.save();
+    console.log("working2")
+
+    // Move applicant from `applicants` to `selectedApplicants`
+    project.selectedApplicants = project.selectedApplicants.filter(
+      (app) => app.toString() !== applicantId
+    );
+
+    await project.save();
+    console.log("working3")
+
+    user.appliedProject = user.appliedProject.filter(
+      (app) => app.toString() !== projectId
+    );
+
+    await user.save();
+    
+
+    res.status(200).json({ message: "Applicant removed successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+}
+
+export const getCreatedByProject = async (req, res) => {
+  try {
+    const projectId = req.params.id
+    console.log(projectId)
+    const createdBy = await Project.findById(projectId).populate("createdBy");
+    if (!createdBy) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+    res.status(200).json(createdBy);
+  } catch(error){
+    console.error("Error fetching createdBy project:", error);
+    res.status(500).json({ message: "Failed to fetch createdBy project" });
+  }
+}

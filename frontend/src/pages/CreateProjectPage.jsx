@@ -161,7 +161,8 @@ function CreateProjectPage() {
           {/* Project Details */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="group relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <p className="ml-2 text-sm font-medium text-gray-700">Start Date</p>
+              <div className="absolute mt-4 left-0 pl-3 flex  pointer-events-none">
                 <Calendar className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500" />
               </div>
               <input
@@ -175,7 +176,8 @@ function CreateProjectPage() {
             </div>
 
             <div className="group relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <p className="ml-2 text-sm font-medium text-gray-700">End date</p>
+              <div className="absolute mt-4 left-0 pl-3 flex  pointer-events-none">
                 <Calendar className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500" />
               </div>
               <input

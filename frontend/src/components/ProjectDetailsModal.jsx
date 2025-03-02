@@ -1,8 +1,26 @@
 import { Link } from "react-router-dom";
 import { X, Users, Calendar, Code, ExternalLink } from "lucide-react";
+import { useEffect, useState } from "react";
+import { axiosInstance } from "../lib/axios";
 
 const ProjectDetailsModal = ({ project, onClose, user }) => {
-  if (!project) return null;
+  if (!project) return;
+
+  const [createdBy, setCreatedBy] = useState("");
+  console.log("projectid", project._id);
+  useEffect(() => {
+    axiosInstance
+      .get(`/editproject/project/createdBy/${project._id}`)
+      .then((res) => {
+        setCreatedBy(res.data.createdBy);
+        console.log(res.data.createdBy);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }, []);
+
+  console.log(createdBy);
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm z-50">
@@ -40,25 +58,25 @@ const ProjectDetailsModal = ({ project, onClose, user }) => {
                 Project Creator
               </h3>
               <Link
-                to={`/profile/${user.username}`}
+                to={`/profile/${createdBy.username}`}
                 className="flex items-center gap-3 group"
               >
                 <img
                   src={
-                    project.creator?.avatar ||
-                    `https://ui-avatars.com/api/?name=${user.name}`
+                    createdBy?.bannerImg ||
+                    `https://ui-avatars.com/api/?name=${createdBy.name}`
                   }
-                  alt={user.name}
+                  alt={createdBy.name}
                   className="w-10 h-10 rounded-full"
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <h4 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
-                      {user.name}
+                      {createdBy.name}
                     </h4>
                     <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
                   </div>
-                  <p className="text-sm text-gray-500">@{user.username}</p>
+                  <p className="text-sm text-gray-500">@{createdBy.username}</p>
                 </div>
               </Link>
             </div>

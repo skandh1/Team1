@@ -69,6 +69,8 @@ const ProfileHeader = ({ userData, onSave, isOwnProfile }) => {
 	});
 
 	const getConnectionStatus = useMemo(() => {
+		if (connectionStatus?.data?.status === "pending") return "pending";
+		if (connectionStatus?.data?.status === "received") return "received";
 		if (isConnected) return "connected";
 		if (!isConnected) return "not_connected";
 		return connectionStatus?.data?.status;

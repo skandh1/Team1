@@ -94,6 +94,8 @@ const NotificationsPage = () => {
         return <Star className="text-yellow-500" />;
       case "selected":
         return <UserPlus className="text-purple-800" />;
+      case "Removed":
+        return <Trash2 className="text-red-500" />;
       default:
         return null;
     }
@@ -165,6 +167,15 @@ const NotificationsPage = () => {
             rated your work on project "{notification.relatedProject.name}"
           </span>
         );
+      case "Removed":
+        return (
+          <span>
+            <Link to={`/profile/${notification.relatedUser.username}`} className="font-bold hover:underline">
+              {notification.relatedUser.name}
+            </Link>{" "}
+            removed you from their project
+          </span>
+        )
       default:
         return null;
     }
