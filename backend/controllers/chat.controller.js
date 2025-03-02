@@ -1,7 +1,6 @@
-import { request } from "express";
+import { StreamChat } from "stream-chat";
 import User from "../models/user.model.js";
 import Project from "../models/project.model.js";
-import { StreamChat } from "stream-chat";
 
 const serverClient = StreamChat.getInstance(
   "cku46u7u4new",
@@ -9,6 +8,7 @@ const serverClient = StreamChat.getInstance(
 );
 
 const apiKey = "cku46u7u4new";
+
 export const getChatToken = async (req, res) => {
   try {
     if (!req.user) {
@@ -22,154 +22,116 @@ export const getChatToken = async (req, res) => {
 
     const token = serverClient.createToken(user._id.toString());
     res.status(200).json({
-      userId: user._id,
+      userId: user._id.toString(),
       username: user.name,
+      user: user,
       token,
       apiKey,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error generating token", error: error.message });
+    console.error("Error generating token:", error);
+    res.status(500).json({ message: "Error generating token", error: error.message });
   }
 };
 
-export const createOrUpdateChat = async (req, res) => {
-  try {
-    const { userId, memberIds } = req.body;
-    if (!userId || !memberIds || memberIds.length === 0) {
-      return res.status(400).json({ message: "Invalid request" });
-    }
-
-    const chatUsers = [userId, ...memberIds]; // All users in chat
-
-    // ✅ Ensure all users exist in StreamChat
-    const usersToCreate = chatUsers.map((id) => ({ id }));
-    await serverClient.upsertUsers(usersToCreate);
-
-    const chatId = chatUsers.sort().join("_"); // Unique chat ID
-
-    let channel = serverClient.channel("messaging", chatId, {
-      name: "Chat Room",
-      members: chatUsers,
-      created_by_id: userId,
-    });
-
-    await channel.create();
-
-    res.status(200).json({ message: "Chat created or updated", chatId });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Internal server error", error: error.message });
-  }
-};
-
-// Create new chat channel
-export const createChat = async (req, res) => {
-  try {
-    const { otherUserId } = req.body;
-    const currentUserId = req.user._id; // from your auth middleware
-
-    const channelId = [currentUserId, otherUserId].sort().join("-");
-    const channel = serverClient.channel("messaging", channelId, {
-      members: [currentUserId, otherUserId],
-    });
-
-    await channel.create();
-    res.json(channel.id);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-export const searchUser = async (req, res) => {
-  try {
-    const { username } = req.query;
-    const users = await User.find({
-      username: { $regex: username, $options: "i" },
-    }).select("username avatar _id");
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-// Get all users (except current user)
 export const getUser = async (req, res) => {
   try {
-    // Get the projects where the current user has applied
-    const appliedProjects = await Project.find({ _id: { $in: req.user.appliedProject } });
+    // Get current user's projects where they are selected
+    const appliedProjects = await Project.find({
+      selectedApplicants: req.user._id
+    });
 
-    // Get the project creators where the current user is selected
-    const selectedProjectCreators = appliedProjects.filter((project) => project.selectedApplicants.includes(req.user._id)).map((project) => project.createdBy);
+    // Get project creators for projects where user is selected
+    const projectCreatorIds = appliedProjects.map(project => project.createdBy);
 
-    // Get the projects created by the current user
+    // Get projects created by the user
     const ownProjects = await Project.find({ createdBy: req.user._id });
+    
+    // Get selected applicants from user's own projects
+    const selectedApplicantIds = ownProjects.flatMap(project => 
+      project.selectedApplicants.map(id => id.toString())
+    );
 
-    // Extract the selectedApplicants from the own projects
-    const ownSelectedApplicants = ownProjects.flatMap((project) => project.selectedApplicants);
+    // Combine all project-related user IDs
+    const projectUserIds = [...new Set([
+      ...projectCreatorIds.map(id => id.toString()),
+      ...selectedApplicantIds
+    ])].filter(id => id !== req.user._id.toString());
 
-    // Find users that are in the selectedApplicants array, selected project creators, and not the current user
-    const users = await User.find({ _id: { $in: [...ownSelectedApplicants, ...selectedProjectCreators], $ne: req.user._id } });
+    // Get connection-only users (friends who are not project members)
+    const connectionOnlyUsers = await User.find({
+      _id: { 
+        $in: req.user.connections,
+        $nin: projectUserIds,
+        $ne: req.user._id
+      }
+    }).select('_id name username profilePicture lastMessage lastMessageTime messageCount');
 
-    res.json(users);
+    // Get project members
+    const projectUsers = await User.find({
+      _id: { 
+        $in: projectUserIds,
+        $ne: req.user._id
+      }
+    }).select('_id name username profilePicture lastMessage lastMessageTime messageCount');
+
+    // Format users with type indicator
+    const formattedProjectUsers = projectUsers.map(user => ({
+      _id: user._id.toString(),
+      name: user.name,
+      username: user.username,
+      profilePicture: user.profilePicture,
+      isProjectMember: true,
+      messageCount: user.messageCount || 0,
+      lastMessage: user.lastMessage || '',
+      lastMessageTime: user.lastMessageTime || null
+    }));
+
+    const formattedConnectionUsers = connectionOnlyUsers.map(user => ({
+      _id: user._id.toString(),
+      name: user.name,
+      username: user.username,
+      profilePicture: user.profilePicture,
+      isProjectMember: false,
+      messageCount: user.messageCount || 0,
+      lastMessage: user.lastMessage || '',
+      lastMessageTime: user.lastMessageTime || null
+    }));
+
+    // Combine and sort users
+    const allUsers = [...formattedProjectUsers, ...formattedConnectionUsers]
+      .sort((a, b) => (b.messageCount || 0) - (a.messageCount || 0));
+
+    res.json(allUsers);
   } catch (error) {
+    console.error('Error in getUser:', error);
     res.status(500).json({ error: error.message });
   }
 };
 
 export const channel = async (req, res) => {
-    const { user1Id, user2Id } = req.body;
-    try {
-      // 1. Check if users exists in getstream if not create them
-      const users = await serverClient.queryUsers({
-        id: { $in: [user1Id, user2Id] },
-      });
-      const existingUserIds = users.users.map((user) => user.id);
-      const usersToCreate = [];
+  const { user1Id, user2Id } = req.body;
+  try {
+    // Create channel ID by sorting user IDs to ensure consistency
+    const channelId = ["messaging", ...[user1Id, user2Id].sort()].join("-");
+    
+    // Create or get channel
+    const channel = serverClient.channel("messaging", channelId, {
+      members: [user1Id, user2Id],
+      created_by_id: user1Id,
+    });
 
-      if (!existingUserIds.includes(user1Id)) {
-        const user1 = await User.findById(user1Id); // Assuming you have your user model
-        usersToCreate.push({ id: user1Id, name: user1.name }); // Add other user properties as needed
-      }
+    await channel.create();
 
-      if (!existingUserIds.includes(user2Id)) {
-        const user2 = await User.findById(user2Id); // Assuming you have your user model
-        usersToCreate.push({ id: user2Id, name: user2.name }); // Add other user properties as needed
-      }
-
-      if (usersToCreate.length > 0) {
-        await serverClient.upsertUsers(usersToCreate);
-      }
-
-      const channelId = ["chat", ...[user1Id, user2Id].sort()].join("-");
-      let channel = serverClient.channel("messaging", channelId, {
+    res.json({
+      channel: {
+        id: channel.id,
+        cid: channel.cid,
         members: [user1Id, user2Id],
-        created_by_id: user1Id,
-      });
-
-      const existingChannel = await serverClient.queryChannels({
-        id: channelId,
-      });
-
-      if (existingChannel.length === 0) {
-        await channel.create();
-      } else {
-        channel = existingChannel[0];
-      }
-
-      await channel.watch();
-
-      res.json({
-        channel: {
-          id: channel.id,
-          cid: channel.cid,
-          members: channel.members,
-        },
-      });
-    } catch (error) {
-      console.error("Error creating/getting channel:", error);
-      res.status(500).json({ error: "Failed to create/get channel" });
-    }
+      },
+    });
+  } catch (error) {
+    console.error("Error creating/getting channel:", error);
+    res.status(500).json({ error: "Failed to create/get channel" });
+  }
 };

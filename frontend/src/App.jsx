@@ -18,6 +18,7 @@ import ProjectDisplayPage from "./pages/ProjectDisplayPage";
 import MyProjectsPage from "./pages/MyProjectsPage";
 import AppliedProjectPage from "./pages/appliedProjectPage";
 import ChatPage from "./pages/ChatPage";
+import NotFound from "./pages/NotFoundPage.tsx";
 
 function App() {
     const { data: authUser, isLoading } = useQuery({
@@ -54,7 +55,8 @@ function App() {
 								<Route path='/createprojectpage' element={authUser ? <CreateProjectPage /> : <Navigate to={'/login'} />} />
                 <Route path='/network' element={authUser ? <NetworkPage /> : <Navigate to={'/login'} />} />
                 <Route path='/post/:postId' element={authUser ? <PostPage /> : <Navigate to={'/login'} />} />
-					<Route path='/profile/:username' element={authUser ? <ProfilePage /> : <Navigate to={'/login'} />} />
+                <Route path='/profile/:username' element={authUser ? <ProfilePage /> : <Navigate to={'/login'} />} />
+                <Route path='*' element={<NotFound />} />
 					
             </Routes>
             <Toaster />

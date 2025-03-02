@@ -15,6 +15,7 @@ const SignUpForm = () => {
 	const { mutate: signUpMutation, isLoading } = useMutation({
 		mutationFn: async (data) => {
 			const res = await axiosInstance.post("/auth/signup", data);
+			toast.success(`Logged in successfully, Welcome ${name}`);
 			return res.data;
 		},
 		onSuccess: () => {
@@ -38,7 +39,7 @@ const SignUpForm = () => {
 				placeholder='Full name'
 				value={name}
 				onChange={(e) => setName(e.target.value)}
-				className='input input-bordered w-full'
+				className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
 				required
 			/>
 			<input
@@ -46,7 +47,7 @@ const SignUpForm = () => {
 				placeholder='Username'
 				value={username}
 				onChange={(e) => setUsername(e.target.value)}
-				className='input input-bordered w-full'
+				className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black'
 				required
 			/>
 			<input
@@ -54,7 +55,7 @@ const SignUpForm = () => {
 				placeholder='Email'
 				value={email}
 				onChange={(e) => setEmail(e.target.value)}
-				className='input input-bordered w-full'
+				className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black'
 				required
 			/>
 			<input
@@ -62,7 +63,7 @@ const SignUpForm = () => {
 				placeholder='Password (6+ characters)'
 				value={password}
 				onChange={(e) => setPassword(e.target.value)}
-				className='input input-bordered w-full'
+				className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black'
 				required
 			/>
 

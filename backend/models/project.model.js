@@ -29,9 +29,9 @@ const projectSchema = new mongoose.Schema(
       required: true,
     },
     isEnabled: { type: Boolean, default: true },
-    timeframe: { type: String, required: true }, // Example: "1 month", "3 weeks"
-    deadline: { type: Date, required: true },
-    budget: { type: Number, default: 0 },
+    startDate: { type: Date, required: true },
+    endDate: { type: Date, required: true },
+    peopleRequired: { type: Number, required: true, min: 1 },
     status: {
       type: String,
       enum: ["Open", "In Progress", "Completed"],
