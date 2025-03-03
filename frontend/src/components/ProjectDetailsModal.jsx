@@ -63,7 +63,7 @@ const ProjectDetailsModal = ({ project, onClose, user }) => {
               >
                 <img
                   src={
-                    createdBy?.bannerImg ||
+                    createdBy?.profilePicture ||
                     `https://ui-avatars.com/api/?name=${createdBy.name}`
                   }
                   alt={createdBy.name}

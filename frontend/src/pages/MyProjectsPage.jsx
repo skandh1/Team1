@@ -125,6 +125,10 @@ function MyProjectsPage() {
     }
   };
 
+  const redirectToCreateProject = () => {
+    window.location.href = "/createprojectpage";
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 w-full">
@@ -222,7 +226,7 @@ function MyProjectsPage() {
                 You haven't created any projects yet. Start by creating your
                 first project to begin collaborating with others.
               </p>
-              <button
+              <button onClick={redirectToCreateProject}
                 className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center gap-2"
                 type="button"
               >

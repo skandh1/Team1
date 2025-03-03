@@ -382,3 +382,43 @@ export const getCreatedByProject = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch createdBy project" });
   }
 }
+
+export const startProject = async (req, res) => {
+  try {
+    const project = await Project.findOne({
+      _id: req.params.id,
+      createdBy: req.user._id,
+    }).populate('selectedApplicants');
+
+    if (!project) {
+      return res
+        .status(404)
+        .json({ message: "Project not found or unauthorized" });
+    }
+    project.status = "in_progress";
+    await project.save();
+
+    // Create notifications for all selected applicants
+    const notifications = project.selectedApplicants.map(applicant => ({
+      recipient: applicant._id,
+      type: "projectStarted",
+      relatedUser: req.user._id,
+      relatedProject: project._id,
+      message: `The project "${project.name}" has started.`,
+      createdAt: new Date(),
+      read: false,
+    }));
+    
+
+    await Notification.insertMany(notifications);
+    res.status(200).json({
+      message: "Project status updated and notifications sent",
+      status: project.status,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to update project status",
+      error: error.message,
+    });
+  }
+}
