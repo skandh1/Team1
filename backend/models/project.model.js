@@ -34,7 +34,7 @@ const projectSchema = new mongoose.Schema(
     peopleRequired: { type: Number, required: true, min: 1 },
     status: {
       type: String,
-      enum: ["Open", "In Progress", "Completed"],
+      enum: ["Open", "In_progress", "Completed"],
       default: "Open",
     },
   },

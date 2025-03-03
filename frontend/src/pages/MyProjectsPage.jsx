@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
@@ -17,8 +17,11 @@ import {
   Clock,
   ArrowRight,
   Shield,
+  Search,
+  Filter,
+  Play,
 } from "lucide-react";
-import ProjectApplicantsModal from "../components/ProjectApplicantsModal";
+import ProjectApplicantsModal from "../components/ProjectApplicantsModal.jsx";
 import RatingModal from "../components/RatingModel";
 
 function MyProjectsPage() {
@@ -26,6 +29,9 @@ function MyProjectsPage() {
   const [selectedProject, setSelectedProject] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [ratingProject, setRatingProject] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [sortOrder, setSortOrder] = useState("latest");
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["myProjects"],
@@ -75,6 +81,16 @@ function MyProjectsPage() {
     onError: () => toast.error("Failed to update project status"),
   });
 
+  const startProjectMutation = useMutation({
+    mutationFn: async (id) => axiosInstance.post(`/editProject/start/${id}`),
+    onSuccess: () => {  
+      toast.success("Project started successfully");
+      queryClient.invalidateQueries(["myProjects"]);
+    },
+    onError: (error) =>
+      toast.error(error.response?.data?.message || "Failed to start project"),
+  });
+
   const submitRatingsMutation = useMutation({
     mutationFn: async ({ projectId, ratings }) =>
       axiosInstance.post(`/editProject/${projectId}/ratings`, { ratings }),
@@ -109,6 +125,10 @@ function MyProjectsPage() {
         return <CheckCircle2 className="w-4 h-4 text-green-600" />;
       case "cancelled":
         return <XCircle className="w-4 h-4 text-red-600" />;
+      case "In_progress":
+        return <Play className="w-4 h-4 text-yellow-600" />;
+      case "Open":
+        return <Clock className="w-4 h-4 text-blue-600" />;
       default:
         return <Clock className="w-4 h-4 text-blue-600" />;
     }
@@ -120,6 +140,10 @@ function MyProjectsPage() {
         return "bg-green-100 text-green-800";
       case "cancelled":
         return "bg-red-100 text-red-800";
+      case "In_progress":
+        return "bg-yellow-100 text-yellow-800";
+      case "Open":
+        return "bg-blue-100 text-blue-800";
       default:
         return "bg-blue-100 text-blue-800";
     }
@@ -127,7 +151,36 @@ function MyProjectsPage() {
 
   const redirectToCreateProject = () => {
     window.location.href = "/createprojectpage";
-  }
+  };
+
+  const handleStartProject = (projectId) => {
+    startProjectMutation.mutate(projectId);
+  };
+
+  // Filter and sort projects
+  const filteredProjects = data
+    ? data.filter((project) => {
+        // Search term filter
+        const matchesSearch =
+          project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          project.description.toLowerCase().includes(searchTerm.toLowerCase());
+
+        // Status filter
+        const matchesStatus =
+          statusFilter === "all" || project.status === statusFilter;
+
+        return matchesSearch && matchesStatus;
+      })
+    : [];
+
+  // Sort projects
+  const sortedProjects = [...filteredProjects].sort((a, b) => {
+    if (sortOrder === "latest") {
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    } else {
+      return new Date(a.createdAt) - new Date(b.createdAt);
+    }
+  });
 
   if (isLoading) {
     return (
@@ -166,10 +219,13 @@ function MyProjectsPage() {
   return (
     <>
       {selectedProject && (
-        <div className="">
-          <div className="">
-            <div className="" onClick={() => setSelectedProject(null)}></div>
-            <div className="">
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen">
+            <div
+              className="fixed inset-0 bg-black opacity-50"
+              onClick={() => setSelectedProject(null)}
+            ></div>
+            <div className="relative z-10">
               <ProjectApplicantsModal
                 project={selectedProject}
                 onClose={() => setSelectedProject(null)}
@@ -183,10 +239,13 @@ function MyProjectsPage() {
       )}
 
       {ratingProject && (
-        <div className="">
-          <div className="">
-            <div className="" onClick={() => setRatingProject(null)}></div>
-            <div className="">
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen">
+            <div
+              className="fixed inset-0 bg-black opacity-50"
+              onClick={() => setRatingProject(null)}
+            ></div>
+            <div className="relative z-10">
               <RatingModal
                 project={ratingProject}
                 onClose={() => setRatingProject(null)}
@@ -209,34 +268,94 @@ function MyProjectsPage() {
               </h1>
             </div>
             <div className="text-sm text-gray-500">
-              {data?.length || 0} {data?.length === 1 ? "project" : "projects"}{" "}
-              total
+              {filteredProjects.length || 0}{" "}
+              {filteredProjects.length === 1 ? "project" : "projects"} found
             </div>
           </div>
 
-          {data.length === 0 ? (
+          {/* Search and Filter Controls */}
+          <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Search className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    placeholder="Search projects..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <div className="relative">
+                  <div className="flex items-center">
+                    <Filter className="h-5 w-5 text-gray-400 mr-2" />
+                    <select
+                      className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                    >
+                      <option value="all">All Status</option>
+                      <option value="Open">Open</option>
+                      <option value="In_progress">In Progress</option>
+                      <option value="Completed">Completed</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="relative">
+                  <select
+                    className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    value={sortOrder}
+                    onChange={(e) => setSortOrder(e.target.value)}
+                  >
+                    <option value="latest">Latest First</option>
+                    <option value="oldest">Oldest First</option>
+                  </select>
+                </div>
+              </div>
+              <button
+                onClick={redirectToCreateProject}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center gap-2"
+                type="button"
+              >
+                Create Project
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {sortedProjects.length === 0 ? (
             <div className="bg-white rounded-xl shadow-sm p-6 sm:p-8 text-center w-full">
               <div className="bg-blue-50 p-4 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
                 <FolderKanban className="w-10 h-10 text-blue-500" />
               </div>
               <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                No Projects Yet
+                No Projects Found
               </h2>
               <p className="text-gray-600 max-w-md mx-auto mb-6">
-                You haven't created any projects yet. Start by creating your
-                first project to begin collaborating with others.
+                {data && data.length === 0
+                  ? "You haven't created any projects yet. Start by creating your first project to begin collaborating with others."
+                  : "No projects match your current filters. Try adjusting your search criteria."}
               </p>
-              <button onClick={redirectToCreateProject}
-                className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center gap-2"
-                type="button"
-              >
-                Create Your First Project
-                <ArrowRight className="w-4 h-4" />
-              </button>
+              {data && data.length === 0 && (
+                <button
+                  onClick={redirectToCreateProject}
+                  className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center gap-2"
+                  type="button"
+                >
+                  Create Your First Project
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 w-full">
-              {data.map((project) => (
+              {sortedProjects.map((project) => (
                 <div
                   key={project._id}
                   className={`
@@ -258,7 +377,7 @@ function MyProjectsPage() {
                       >
                         {getStatusIcon(project.status)}
                         <span className="capitalize">
-                          {project.status || "In Progress"}
+                          {project.status || "Open"}
                         </span>
                       </div>
                       <button
@@ -323,21 +442,36 @@ function MyProjectsPage() {
                     </div>
 
                     <div className="pt-3 border-t border-gray-100">
-                      {project.status !== "Completed" && (
-                        <button
-                          onClick={() =>
-                            updateStatusMutation.mutate({
-                              id: project._id,
-                              status: "Completed",
-                            })
-                          }
-                          className="w-full mb-2.5 px-3 py-1.5 text-xs bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors flex items-center justify-center gap-1.5"
-                          type="button"
-                        >
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          Mark as Complete
-                        </button>
-                      )}
+                      {/* Start Project Button */}
+                      {project.status === "Open" &&
+                        project.selectedApplicants?.length > 0 && (
+                          <button
+                            onClick={() => handleStartProject(project._id)}
+                            className="w-full mb-2.5 px-3 py-1.5 text-xs bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors flex items-center justify-center gap-1.5"
+                            type="button"
+                          >
+                            <Play className="w-3.5 h-3.5" />
+                            Start Project
+                          </button>
+                        )}
+
+                      {/* Complete Project Button */}
+                      {project.status !== "Completed" &&
+                        project.status === "In_progress" && (
+                          <button
+                            onClick={() =>
+                              updateStatusMutation.mutate({
+                                id: project._id,
+                                status: "Completed",
+                              })
+                            }
+                            className="w-full mb-2.5 px-3 py-1.5 text-xs bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors flex items-center justify-center gap-1.5"
+                            type="button"
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            Mark as Complete
+                          </button>
+                        )}
 
                       <div className="flex gap-2">
                         <button
