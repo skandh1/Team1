@@ -12,7 +12,6 @@ import {
   startProject,
   submitProjectRatings,
   tollgeProject,
-  unApplyProject,
   updateProjectStatus,
 } from "../controllers/editProject.controller.js";
 
@@ -30,5 +29,5 @@ router.get('/:id/ratings', protectRoute, getProjectRatings);
 router.post("/user/details", protectRoute, getUserDetails);
 router.get("/project/createdBy/:id", protectRoute, getCreatedByProject)
 router.post("/start/:id", protectRoute, startProject)
-router.post("/unapply/:id", protectRoute, unApplyProject)
+
 export default router;

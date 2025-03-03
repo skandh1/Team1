@@ -44,13 +44,25 @@ const AppliedProjects = () => {
 
   const handleLeaveProject = async (projectId) => {
     try {
-      await axiosInstance.post("/appliedProjects/leave", { projectId });
+      // Different endpoint based on whether user is selected or not
+      const project = projects.find(p => p._id === projectId);
+      
+      if (project.isSelected) {
+        // If selected, we don't allow leaving (handled in ProjectDetails component)
+        return;
+      } else {
+        // If not selected, we allow withdrawing application
+        await axiosInstance.post("/appliedProjects/withdraw", { projectId });
+      }
+      
       // Remove project from the list
       setProjects(projects.filter(p => p._id !== projectId));
       // Close the modal
       setSelectedProject(null);
+      toast.success("Successfully withdrawn from the project");
     } catch (error) {
       console.error("Error leaving project:", error);
+      toast.error(error.response?.data?.message || "Failed to withdraw from project");
       throw error;
     }
   };

@@ -70,7 +70,6 @@ function MyProjectsPage() {
     onSuccess: (_, variables) => {
       toast.success("Project status updated successfully");
       queryClient.invalidateQueries(["myProjects"]);
-      console.log(variables, data);
       if (variables.status === "Completed") {
         const project = data.find((p) => p._id === variables.id);
         if (project?.selectedApplicants?.length > 0) {

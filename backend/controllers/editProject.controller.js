@@ -319,7 +319,7 @@ export const getProjectRatings = async (req, res) => {
 export const removeApplicant = async (req, res) => {
   try {
     const { projectId, applicantId } = req.body;
-    console.log("working0")
+
     const project = await Project.findById(projectId);
     if (!project) {
       return res.status(404).json({ message: "Project not found" });
@@ -333,7 +333,7 @@ export const removeApplicant = async (req, res) => {
         .status(400)
         .json({ message: "User not in the project" });
     }
-    console.log("working1")
+
     const user = await User.findById(applicantId);
     if (!user) {
       return res.status(404).json({ message: "Applicant not found" });
@@ -345,7 +345,7 @@ export const removeApplicant = async (req, res) => {
       relatedUser: project.createdBy, // Project ID goes in relatedPost
     });
     await newNotification.save();
-    console.log("working2")
+
 
     // Move applicant from `applicants` to `selectedApplicants`
     project.selectedApplicants = project.selectedApplicants.filter(
@@ -353,8 +353,6 @@ export const removeApplicant = async (req, res) => {
     );
 
     await project.save();
-    console.log("working3")
-
     user.appliedProject = user.appliedProject.filter(
       (app) => app.toString() !== projectId
     );
@@ -423,33 +421,4 @@ export const startProject = async (req, res) => {
   }
 }
 
-export const unApplyProject = async (req, res) => {
-  try {
-    const { projectId } = req.params;
-    const userId = req.user._id;
 
-    // Find the project
-    const project = await Project.findById(projectId);
-    if (!project) {
-      return res.status(404).json({ message: "Project not found" });
-    }
-
-    // Check if the user has applied to the project
-    if (!project.applicants.includes(userId)) {
-      return res.status(400).json({ message: "You have not applied to this project" });
-    }
-
-    // Remove the user from the project's applicants list
-    project.applicants = project.applicants.filter(applicant => applicant.toString() !== userId.toString());
-    await project.save();
-
-    // Remove the project from the user's appliedProject list
-    const user = await User.findById(userId);
-    user.appliedProject = user.appliedProject.filter(project => project.toString() !== projectId);
-    await user.save();
-
-    res.status(200).json({ message: "Successfully unapplied from the project" });
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
-  }
-}

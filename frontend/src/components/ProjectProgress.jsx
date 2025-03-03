@@ -1,95 +1,80 @@
 import React from "react";
-import { 
-  Calendar, 
-  Users, 
-  CheckCircle2, 
-  Clock3, 
-  BarChart3,
-  AlertCircle
-} from "lucide-react";
+import { Calendar, Users, CheckCircle2, Clock3 } from "lucide-react";
 
-const ProjectProgress = ({ project }) => {
-  if (!project) return null;
-
-  // Calculate progress percentage based on dates
-  const calculateProgress = () => {
-    const now = new Date();
-    const start = new Date(project.startDate);
-    const end = new Date(project.endDate);
-    
-    // If project hasn't started yet
-    if (now < start) return 0;
-    
-    // If project is completed
-    if (now > end) return 100;
-    
-    // Calculate progress percentage
-    const totalDuration = end - start;
-    const elapsed = now - start;
-    return Math.round((elapsed / totalDuration) * 100);
-  };
-
-  const progress = calculateProgress();
-  
-  // Determine status color
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Open": return "text-blue-600 bg-blue-100";
-      case "In Progress": return "text-amber-600 bg-amber-100";
-      case "Completed": return "text-green-600 bg-green-100";
-      default: return "text-gray-600 bg-gray-100";
-    }
-  };
-  
-  const statusClass = getStatusColor(project.status);
+const ProjectProgress = ({ project, isParticipant }) => {
+  // If user is not a participant, don't show progress
+  if (!isParticipant) {
+    return null;
+  }
 
   return (
-    <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg">
-      <h3 className="text-lg font-semibold mb-4">Project Progress</h3>
+    <div className="bg-gray-50 rounded-xl p-4 mb-4">
+      <h3 className="text-lg font-semibold text-gray-900 mb-3">Project Progress</h3>
       
-      {/* Progress bar */}
+      {/* Project Timeline */}
       <div className="mb-4">
-        <div className="flex justify-between items-center mb-1">
-          <span className="text-sm font-medium text-gray-700">{progress}% Complete</span>
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusClass}`}>
-            {project.status}
-          </span>
+        <div className="flex items-center gap-2 text-gray-700 mb-2">
+          <Calendar size={18} />
+          <span className="font-medium">Timeline</span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2.5">
-          <div 
-            className="bg-blue-600 h-2.5 rounded-full" 
-            style={{ width: `${progress}%` }}
-          ></div>
+        <div className="ml-6">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-sm font-medium text-gray-700">Start Date:</span>
+            <span className="text-sm text-gray-600">
+              {project.startDate 
+                ? new Date(project.startDate).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })
+                : "Not specified"}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-700">End Date:</span>
+            <span className="text-sm text-gray-600">
+              {project.endDate 
+                ? new Date(project.endDate).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })
+                : "Not specified"}
+            </span>
+          </div>
         </div>
       </div>
       
-      {/* Project details */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <Calendar size={16} />
-          <span>
-            {new Date(project.startDate).toLocaleDateString()} - {new Date(project.endDate).toLocaleDateString()}
-          </span>
+      {/* Project Team */}
+      <div>
+        <div className="flex items-center gap-2 text-gray-700 mb-2">
+          <Users size={18} />
+          <span className="font-medium">Team Members</span>
         </div>
-        
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <Users size={16} />
-          <span>
-            {project.selectedApplicants?.length || 0} of {project.peopleRequired} team members
-          </span>
+        <div className="ml-6">
+          {project.team && project.team.length > 0 ? (
+            <ul className="space-y-2">
+              {project.team.map((member, index) => (
+                <li key={index} className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
+                    {member.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">{member.name}</p>
+                    <p className="text-xs text-gray-500">{member.role || "Team Member"}</p>
+                  </div>
+                  {member.isOwner && (
+                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                      Owner
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-gray-500">No team members yet</p>
+          )}
         </div>
-        
-        {project.isSelected ? (
-          <div className="flex items-center gap-2 text-sm text-green-600">
-            <CheckCircle2 size={16} />
-            <span>You are selected for this project</span>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2 text-sm text-amber-600">
-            <Clock3 size={16} />
-            <span>Application pending</span>
-          </div>
-        )}
       </div>
     </div>
   );
