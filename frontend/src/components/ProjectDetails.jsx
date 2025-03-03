@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { axiosInstance } from "../lib/axios";
 import { 
   Calendar, 
   Users, 
@@ -8,7 +7,7 @@ import {
   AlertCircle,
   XCircle
 } from "lucide-react";
-import ProjectProgress from "../components/ProjectProgress";
+import ProjectProgress from "./ProjectProgress";
 import toast from "react-hot-toast";
 
 const ProjectDetails = ({ project, onLeaveProject, onClose }) => {
@@ -17,16 +16,31 @@ const ProjectDetails = ({ project, onLeaveProject, onClose }) => {
 
   if (!project) return null;
 
+  // Determine if user is a participant or just an applicant
+  const isParticipant = project.isSelected;
+
   const handleLeaveProject = async () => {
-    if (!confirm("Are you sure you want to leave this project?")) return;
+    const confirmMessage = isParticipant 
+      ? "You cannot leave a project once you've been selected. Do you want to contact the project owner instead?"
+      : "Are you sure you want to withdraw your application from this project?";
+    
+    if (!confirm(confirmMessage)) return;
+    
+    // If user is a participant, we don't allow leaving
+    if (isParticipant) {
+      // Here you could implement a way to contact the project owner
+      toast.error("You cannot leave a project once you've been selected. Please contact the project owner.");
+      return;
+    }
     
     try {
       setLoading(true);
       setError(null);
       await onLeaveProject(project._id);
+      toast.success("Successfully withdrawn from the project");
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to leave project");
-      toast.error(err.response?.data?.message || "Failed to leave project");
+      setError(err.response?.data?.message || "Failed to withdraw from project");
+      toast.error(err.response?.data?.message || "Failed to withdraw from project");
       console.error("Error leaving project:", err);
     } finally {
       setLoading(false);
@@ -64,12 +78,36 @@ const ProjectDetails = ({ project, onLeaveProject, onClose }) => {
                 ))}
               </div>
             )}
+            
+            {/* Application Status */}
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-sm font-medium text-gray-700">Status:</span>
+              <div
+                className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
+                  isParticipant
+                    ? "bg-green-100 text-green-700"
+                    : "bg-amber-100 text-amber-700"
+                }`}
+              >
+                {isParticipant ? (
+                  <>
+                    <CheckCircle2 size={16} />
+                    <span>Selected - You are part of this project</span>
+                  </>
+                ) : (
+                  <>
+                    <Clock3 size={16} />
+                    <span>Pending - Application under review</span>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
 
-          {/* Project Progress Component */}
-          <ProjectProgress project={project} />
+          {/* Project Progress Component - Only shown to participants */}
+          <ProjectProgress project={project} isParticipant={isParticipant} />
 
-          {/* Leave Project Button */}
+          {/* Leave/Withdraw Button - Different text based on status */}
           <div className="mt-6">
             {error && (
               <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg flex items-center gap-2">
@@ -81,7 +119,11 @@ const ProjectDetails = ({ project, onLeaveProject, onClose }) => {
             <button
               onClick={handleLeaveProject}
               disabled={loading}
-              className="w-full py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`w-full py-3 px-4 font-medium rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                isParticipant 
+                  ? "bg-gray-200 text-gray-700 hover:bg-gray-300" 
+                  : "bg-red-600 hover:bg-red-700 text-white"
+              }`}
             >
               {loading ? (
                 <>
@@ -91,7 +133,7 @@ const ProjectDetails = ({ project, onLeaveProject, onClose }) => {
               ) : (
                 <>
                   <XCircle size={18} />
-                  <span>Leave Project</span>
+                  <span>{isParticipant ? "Cannot Leave Project" : "Withdraw Application"}</span>
                 </>
               )}
             </button>

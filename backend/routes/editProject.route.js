@@ -9,6 +9,7 @@ import {
   getUserDetails,
   removeApplicant,
   selectApplicant,
+  startProject,
   submitProjectRatings,
   tollgeProject,
   updateProjectStatus,
@@ -27,4 +28,6 @@ router.post('/:id/ratings', protectRoute, submitProjectRatings);
 router.get('/:id/ratings', protectRoute, getProjectRatings);
 router.post("/user/details", protectRoute, getUserDetails);
 router.get("/project/createdBy/:id", protectRoute, getCreatedByProject)
+router.post("/start/:id", protectRoute, startProject)
+
 export default router;

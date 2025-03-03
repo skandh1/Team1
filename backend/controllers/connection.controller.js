@@ -171,7 +171,6 @@ export const getConnectionStatus = async (req, res) => {
 
 		const targetUserId = req.params.userId;
 		const currentUserId = req.user._id;
-		console.log(targetUserId, currentUserId);
 		const currentUser = req.user;
 		if (currentUser.connections.includes(targetUserId)) {
 			return res.json({ status: "connected" });

@@ -133,7 +133,7 @@ export const updateProjectStatus = async (req, res) => {
   try {
     const { status } = req.body;
 
-    if (!["Completed", "cancelled", "in_progress"].includes(status)) {
+    if (!["Completed", "Open", "In_progress"].includes(status)) {
       return res.status(400).json({
         message:
           "Invalid status. Must be 'completed', 'cancelled', or 'in_progress'",
@@ -319,7 +319,7 @@ export const getProjectRatings = async (req, res) => {
 export const removeApplicant = async (req, res) => {
   try {
     const { projectId, applicantId } = req.body;
-    console.log("working0")
+
     const project = await Project.findById(projectId);
     if (!project) {
       return res.status(404).json({ message: "Project not found" });
@@ -333,7 +333,7 @@ export const removeApplicant = async (req, res) => {
         .status(400)
         .json({ message: "User not in the project" });
     }
-    console.log("working1")
+
     const user = await User.findById(applicantId);
     if (!user) {
       return res.status(404).json({ message: "Applicant not found" });
@@ -345,7 +345,7 @@ export const removeApplicant = async (req, res) => {
       relatedUser: project.createdBy, // Project ID goes in relatedPost
     });
     await newNotification.save();
-    console.log("working2")
+
 
     // Move applicant from `applicants` to `selectedApplicants`
     project.selectedApplicants = project.selectedApplicants.filter(
@@ -353,8 +353,6 @@ export const removeApplicant = async (req, res) => {
     );
 
     await project.save();
-    console.log("working3")
-
     user.appliedProject = user.appliedProject.filter(
       (app) => app.toString() !== projectId
     );
@@ -382,3 +380,45 @@ export const getCreatedByProject = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch createdBy project" });
   }
 }
+
+export const startProject = async (req, res) => {
+  try {
+    const project = await Project.findOne({
+      _id: req.params.id,
+      createdBy: req.user._id,
+    }).populate('selectedApplicants');
+
+    if (!project) {
+      return res
+        .status(404)
+        .json({ message: "Project not found or unauthorized" });
+    }
+    project.status = "In_progress";
+    await project.save();
+
+    // Create notifications for all selected applicants
+    const notifications = project.selectedApplicants.map(applicant => ({
+      recipient: applicant._id,
+      type: "projectStarted",
+      relatedUser: req.user._id,
+      relatedProject: project._id,
+      message: `The project "${project.name}" has started.`,
+      createdAt: new Date(),
+      read: false,
+    }));
+
+
+    await Notification.insertMany(notifications);
+    res.status(200).json({
+      message: "Project status updated and notifications sent",
+      status: project.status,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to update project status",
+      error: error.message,
+    });
+  }
+}
+
+

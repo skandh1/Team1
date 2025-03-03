@@ -63,7 +63,6 @@ const NotificationsPage = () => {
   });
 
 	const handleProjectRating = (project) => {
-		console.log(project)
     setSelectedProject(project);
     setShowRatingModal(true);
   };
@@ -150,7 +149,7 @@ const NotificationsPage = () => {
           <div>
             <span>Project "{notification.relatedProject.name}" has been completed. </span>
             <button
-              onClick={() => handleProjectRating(notification.relatedProject)}
+              onClick={() => handleProjectRating(notification.relatedProject._id)}
               className="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm hover:bg-blue-100 transition-colors"
             >
               <Star size={14} />
@@ -174,6 +173,17 @@ const NotificationsPage = () => {
               {notification.relatedUser.name}
             </Link>{" "}
             removed you from their project
+          </span>
+        )
+      case "projectStarted":
+        return (
+          <span>
+            Project "{notification.relatedProject.name}" has been started.
+            {notification.relatedProject.status === "Completed" && (
+              <span className="ml-2">
+                <CheckCircle size={14} className="text-green-500" />
+              </span>
+            )}
           </span>
         )
       default:

@@ -593,7 +593,7 @@ function AboutPage() {
               <ul className="space-y-2">
                 <li>
                   <Link
-                    to="/about"
+                    to="/"
                     className="text-gray-600 hover:text-blue-600"
                   >
                     About Us

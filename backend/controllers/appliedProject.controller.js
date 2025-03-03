@@ -57,7 +57,6 @@ export const leaveProject = async (req, res) => {
     // Check if user is part of the project
     const isApplicant = user.appliedProject.includes(projectId);
     const isSelected = project.selectedApplicants.includes(req.user._id);
-    console.log(isApplicant, isSelected, projectId);
     if (!isApplicant || !isSelected) {
       return res.status(400).json({ message: "You are not part of this project." });
     }
@@ -80,3 +79,34 @@ export const leaveProject = async (req, res) => {
     res.status(500).json({ message: "Internal server error", error: error.message });
   }
 };
+
+export const unApplyProject = async (req, res) => {
+  try {
+    const { projectId } = req.body;
+    const userId = req.user._id;
+
+    // Find the project
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    // Check if the user has applied to the project
+    if (!project.applicants.includes(userId)) {
+      return res.status(400).json({ message: "You have not applied to this project" });
+    }
+
+    // Remove the user from the project's applicants list
+    project.applicants = project.applicants.filter(applicant => applicant.toString() !== userId.toString());
+    await project.save();
+
+    // Remove the project from the user's appliedProject list
+    const user = await User.findById(userId);
+    user.appliedProject = user.appliedProject.filter(project => project.toString() !== projectId);
+    await user.save();
+
+    res.status(200).json({ message: "Successfully unapplied from the project" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+}
