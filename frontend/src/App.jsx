@@ -16,7 +16,7 @@ import SearchPage from "./pages/SearchPage.jsx";
 import CreateProjectPage from "./pages/CreateProjectPage.jsx";
 import ProjectDisplayPage from "./pages/ProjectDisplayPage.jsx";
 import MyProjectsPage from "./pages/MyProjectsPage.jsx";
-import AppliedProjectPage from "./pages/appliedProjectPage.jsx";
+import AppliedProjectPage from "./pages/AppliedProjectPage.jsx";
 import ChatPage from "./pages/ChatPage.jsx";
 import NotFound from "./pages/NotFoundPage.tsx";
 
