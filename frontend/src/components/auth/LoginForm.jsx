@@ -5,7 +5,7 @@ import { toast } from "react-hot-toast";
 import { Loader } from "lucide-react";
 
 const LoginForm = ({ onForgotPassword }) => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const queryClient = useQueryClient();
@@ -26,16 +26,16 @@ const LoginForm = ({ onForgotPassword }) => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    loginMutation({ email, password });
+    loginMutation({ username, password });
   };
 
   return (
     <form onSubmit={handleLogin} className="flex flex-col gap-4">
       <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        type="test"
+        placeholder="username"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
         required
       />
