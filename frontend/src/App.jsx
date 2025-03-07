@@ -1,23 +1,23 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./components/layout/Layout";
 
-import HomePage from "./pages/HomePage";
-import LoginPage from "./pages/auth/LoginPage";
-import SignUpPage from "./pages/auth/SignUpPage";
-import AboutPage from "./pages/AboutPage";
+import HomePage from "./pages/HomePage.jsx";
+import LoginPage from "./pages/auth/LoginPage.jsx";
+import SignUpPage from "./pages/auth/SignUpPage.jsx";
+import AboutPage from "./pages/AboutPage.jsx";
 import toast, { Toaster } from "react-hot-toast";
 import { useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "./lib/axios";
-import NotificationsPage from "./pages/NotificationsPage";
-import NetworkPage from "./pages/NetworkPage";
-import PostPage from "./pages/PostPage";
-import ProfilePage from "./pages/ProfilePage";
-import SearchPage from "./pages/SearchPage";
-import CreateProjectPage from "./pages/CreateProjectPage";
-import ProjectDisplayPage from "./pages/ProjectDisplayPage";
+import NotificationsPage from "./pages/NotificationsPage.jsx";
+import NetworkPage from "./pages/NetworkPage.jsx";
+import PostPage from "./pages/PostPage.jsx";
+import ProfilePage from "./pages/ProfilePage.jsx";
+import SearchPage from "./pages/SearchPage.jsx";
+import CreateProjectPage from "./pages/CreateProjectPage.jsx";
+import ProjectDisplayPage from "./pages/ProjectDisplayPage.jsx";
 import MyProjectsPage from "./pages/MyProjectsPage.jsx";
-import AppliedProjectPage from "./pages/appliedProjectPage";
-import ChatPage from "./pages/ChatPage";
+import AppliedProjectPage from "./pages/appliedProjectPage.jsx";
+import ChatPage from "./pages/ChatPage.jsx";
 import NotFound from "./pages/NotFoundPage.tsx";
 
 function App() {
