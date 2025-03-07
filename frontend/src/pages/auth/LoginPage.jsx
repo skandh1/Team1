@@ -72,8 +72,9 @@ const LoginPage = () => {
                 Forgot Password?
               </h2>
               <p className="text-center text-gray-600 mb-8">
-                No worries, we'll help you recover your account
+                No worries, we&apos;ll help you recover your account
               </p>
+
               <ForgotPasswordForm />
             </>
           ) : (
