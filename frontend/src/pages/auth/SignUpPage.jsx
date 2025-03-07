@@ -50,7 +50,7 @@ const SignUpPage = () => {
       {/* Right side - Sign up form */}
       <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 sm:px-16 xl:px-24 bg-white">
         <div className="max-w-md w-full mx-auto">
-          <div className="flex items-center justify-center mb-8">
+          <div className="flex items-center justify-center mb-2">
             <img className="h-12 w-auto" src="/teamify_logo.svg" alt="Teamify" />
           </div>
           
@@ -81,7 +81,7 @@ const SignUpPage = () => {
             </Link>
           </div>
 
-          <p className="mt-8 text-center text-sm text-gray-500">
+          <p className="mt-2 text-center text-sm text-gray-500">
             By signing up, you agree to our{" "}
             <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500">
               Terms of Service

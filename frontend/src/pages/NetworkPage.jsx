@@ -73,7 +73,7 @@ const NetworkPage = () => {
                   <div className="space-y-4">
                     {connectionRequests.data.map((request, index) => (
                       <div
-                        key={request.id}
+                        key={request._id}
                         className="transform transition-all duration-300 hover:translate-x-2"
                         style={{
                           animationDelay: `${index * 100}ms`,

@@ -148,6 +148,22 @@ function MyProjectsPage() {
     }
   };
 
+  const backgroundColor = (status) => {
+    switch (status) {
+      case "Completed":
+        return "bg-green-100";
+      case "cancelled":
+        return "bg-red-100 ";
+      case "In_progress":
+        return "bg-yellow-100";
+      case "Open":
+        return "";
+      default:
+        return "bg-white";
+    }
+  };
+
+
   const redirectToCreateProject = () => {
     window.location.href = "/createprojectpage";
   };
@@ -358,12 +374,13 @@ function MyProjectsPage() {
                 <div
                   key={project._id}
                   className={`
-                    bg-white rounded-xl shadow-sm border transition-all duration-200 w-full
+                    rounded-xl shadow-sm border transition-all duration-200 w-full
                     ${
                       project.isEnabled
                         ? "border-gray-200"
                         : "border-gray-300 bg-gray-100 opacity-75"
-                    }
+                    } 
+                    
                     hover:shadow-md hover:border-blue-200
                   `}
                 >

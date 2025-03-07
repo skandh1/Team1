@@ -1,13 +1,12 @@
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { sendWelcomeEmail } from "../emails/emailHandlers.js";
 
 export const signup = async (req, res) => {
 	try {
-		const { name, username, email, password } = req.body;
+		const { name, username, email, password, securityQuestion } = req.body;
 
-		if (!name || !username || !email || !password) {
+		if (!name || !username || !email || !password || !securityQuestion) {
 			return res.status(400).json({ message: "All fields are required" });
 		}
 		const existingEmail = await User.findOne({ email });
@@ -32,6 +31,7 @@ export const signup = async (req, res) => {
 			email,
 			password: hashedPassword,
 			username,
+			securityQuestion
 		});
 
 		await user.save();
@@ -104,4 +104,64 @@ export const getCurrentUser = async (req, res) => {
 		console.error("Error in getCurrentUser controller:", error);
 		res.status(500).json({ message: "Server error" });
 	}
+};
+
+export const verifyEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ 
+      message: "Email verified",
+      securityQuestion: user.securityQuestion.question
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const verifySecurityAnswer = async (req, res) => {
+  try {
+    const { email, answer } = req.body;
+    const user = await User.findOne({ email });
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isCorrect = user.securityQuestion.answer.toLowerCase() === answer.toLowerCase();
+    
+    if (!isCorrect) {
+      return res.status(400).json({ message: "Incorrect answer" });
+    }
+
+    res.status(200).json({ message: "Answer verified" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+    const user = await User.findOne({ email });
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).json({ message: "Password reset successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
