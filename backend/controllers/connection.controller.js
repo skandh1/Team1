@@ -168,9 +168,9 @@ export const removeConnection = async (req, res) => {
 
 export const getConnectionStatus = async (req, res) => {
 	try {
+
 		const targetUserId = req.params.userId;
 		const currentUserId = req.user._id;
-
 		const currentUser = req.user;
 		if (currentUser.connections.includes(targetUserId)) {
 			return res.json({ status: "connected" });
@@ -193,7 +193,7 @@ export const getConnectionStatus = async (req, res) => {
 		}
 
 		// if no connection or pending req found
-		res.json({ status: "not_connected" });
+		return res.json({ status: "not_connected" });
 	} catch (error) {
 		console.error("Error in getConnectionStatus controller:", error);
 		res.status(500).json({ message: "Server error" });

@@ -8,7 +8,8 @@ import {
   Users,
   FilePlus,
   Loader,
-  DollarSign,
+  Sparkles,
+  FileText,
 } from "lucide-react";
 
 const availableTechnologies = [
@@ -32,8 +33,9 @@ function CreateProjectPage() {
     description: "",
     technologies: [],
     timeframe: "",
-    deadline: "",
-    budget: 0,
+    startDate: "",
+    endDate: "",
+    peopleRequired: 1,
   });
 
   const { mutate: createProjectMutation, isPending } = useMutation({
@@ -76,44 +78,78 @@ function CreateProjectPage() {
       description: "",
       technologies: [],
       timeframe: "",
-      deadline: "",
-      budget: 0,
+      startDate: "",
+      endDate: "",
+      peopleRequired: 1,
     });
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
-      <div className="w-full max-w-3xl bg-white shadow-lg rounded-xl p-8 space-y-6">
-        <h1 className="text-2xl font-bold text-center">Create a New Project</h1>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="relative border rounded-lg p-3 flex items-center bg-gray-50">
-            <FilePlus size={20} className="mr-2 text-gray-500" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <Sparkles className="text-blue-600" size={28} />
+            <h1 className="text-3xl sm:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+              Create New Project
+            </h1>
+          </div>
+          <p className="text-gray-600 text-sm sm:text-base">
+            Share your vision and find the perfect team for your project
+          </p>
+        </div>
+
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 shadow-xl space-y-6"
+        >
+          {/* Project Name */}
+          <div className="group relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FilePlus className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500" />
+            </div>
             <input
               type="text"
               name="name"
               placeholder="Project Name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full bg-transparent focus:outline-none"
+              className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl bg-white/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               required
             />
           </div>
 
-          <div className="border rounded-lg p-3 bg-gray-50">
-            <div className="flex items-center mb-2 text-gray-600">
-              <Code size={20} className="mr-2" />
-              <span>Select Technologies:</span>
+          {/* Project Description */}
+          <div className="group relative">
+            <div className="absolute left-3 top-3">
+              <FileText className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500" />
             </div>
-            <div className="grid grid-cols-3 gap-2">
+            <textarea
+              name="description"
+              placeholder="Project Description"
+              value={formData.description}
+              onChange={handleChange}
+              className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl bg-white/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none min-h-[120px] resize-y"
+              required
+            />
+          </div>
+
+          {/* Technologies */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-gray-700">
+              <Code className="h-5 w-5 text-blue-500" />
+              <span className="font-medium">Technologies Required</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {availableTechnologies.map((tech) => (
                 <button
                   type="button"
                   key={tech}
                   onClick={() => handleTechnologySelect(tech)}
-                  className={`px-3 py-1 rounded-md text-sm transition-all ${
+                  className={`px-3 py-2 rounded-xl text-sm font-medium transition-all ${
                     formData.technologies.includes(tech)
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-200 hover:bg-gray-300"
+                      ? "bg-blue-500 text-white shadow-md hover:bg-blue-600"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
                   {tech}
@@ -122,61 +158,70 @@ function CreateProjectPage() {
             </div>
           </div>
 
-          <textarea
-            name="description"
-            placeholder="Project Description"
-            value={formData.description}
-            onChange={handleChange}
-            className="w-full p-3 border rounded-lg bg-gray-50 focus:outline-none"
-            required
-          ></textarea>
+          {/* Project Details */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="group relative">
+            <p className="ml-2 text-sm font-medium text-gray-700">Start Date</p>
+              <div className="absolute mt-4 left-0 pl-3 flex  pointer-events-none">
+                <Calendar className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500" />
+              </div>
+              <input
+                type="date"
+                name="startDate"
+                value={formData.startDate}
+                onChange={handleChange}
+                className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl bg-white/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                required
+              />
+            </div>
 
-          <div className="relative border rounded-lg p-3 flex items-center bg-gray-50">
-            <Users size={20} className="mr-2 text-gray-500" />
-            <input
-              type="text"
-              name="timeframe"
-              placeholder="Project Timeframe (e.g., 2 weeks)"
-              value={formData.timeframe}
-              onChange={handleChange}
-              className="w-full bg-transparent focus:outline-none"
-              required
-            />
-          </div>
+            <div className="group relative">
+            <p className="ml-2 text-sm font-medium text-gray-700">End date</p>
+              <div className="absolute mt-4 left-0 pl-3 flex  pointer-events-none">
+                <Calendar className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500" />
+              </div>
+              <input
+                type="date"
+                name="endDate"
+                value={formData.endDate}
+                onChange={handleChange}
+                className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl bg-white/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                required
+              />
+            </div>
 
-          <div className="relative border rounded-lg p-3 flex items-center bg-gray-50">
-            <Calendar size={20} className="mr-2 text-gray-500" />
-            <input
-              type="date"
-              name="deadline"
-              value={formData.deadline}
-              onChange={handleChange}
-              className="w-full bg-transparent focus:outline-none"
-              required
-            />
-          </div>
-
-          <div className="relative border rounded-lg p-3 flex items-center bg-gray-50">
-            <DollarSign size={20} className="mr-2 text-gray-500" />
-            <input
-              type="number"
-              name="budget"
-              placeholder="Project Budget (Optional)"
-              value={formData.budget}
-              onChange={handleChange}
-              className="w-full bg-transparent focus:outline-none"
-            />
+            <div className="group relative sm:col-span-2">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Users className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500" />
+              </div>
+              <input
+                type="number"
+                name="peopleRequired"
+                placeholder="Number of People Required"
+                value={formData.peopleRequired}
+                onChange={handleChange}
+                min="1"
+                className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl bg-white/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                required
+              />
+            </div>
           </div>
 
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition-all flex items-center justify-center"
             disabled={isPending}
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 sm:py-4 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200 hover:transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {isPending ? (
-              <Loader className="size-5 animate-spin" />
+              <>
+                <Loader className="h-5 w-5 animate-spin" />
+                <span>Creating Project...</span>
+              </>
             ) : (
-              "Create Project"
+              <>
+                <Sparkles className="h-5 w-5" />
+                <span>Create Project</span>
+              </>
             )}
           </button>
         </form>

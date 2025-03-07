@@ -1,3 +1,85 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Custom styles for Stream Chat */
+/* .str-chat__message-text-inner {
+  background: #f3f4f6 !important;
+  border-radius: 1rem !important;
+  padding: 0.75rem 1rem !important;
+} */
+
+/* .str-chat__message--me .str-chat__message-text-inner {
+  background: #3b82f6 !important;
+  color: white !important;
+} */
+
+.str-chat__message-data {
+  display: none !important;
+}
+
+.str-chat__message-attachment {
+  border-radius: 1rem !important;
+  overflow: hidden !important;
+}
+
+.str-chat__message-attachment-card {
+  border-radius: 1rem !important;
+}
+
+.str-chat__message-input {
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.str-chat__input-flat {
+  border: none !important;
+  background: transparent !important;
+}
+
+.str-chat__input-flat--send-button {
+  color: #3b82f6 !important;
+}
+
+.str-chat__message-list {
+  background: transparent !important;
+  padding: 1rem !important;
+}
+
+.str-chat__message-simple-name {
+  display: none !important;
+}
+
