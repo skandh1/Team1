@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { axiosInstance } from "../lib/axios";
 import {
-  Loader,
   ClipboardList,
   CheckCircle2,
   Clock3,
@@ -151,9 +150,10 @@ const AppliedProjects = () => {
               No Applications Yet
             </h2>
             <p className="text-gray-600 max-w-md mx-auto">
-              You haven't applied to any projects yet. Start exploring available
+              You haven&apos;t applied to any projects yet. Start exploring available
               projects and submit your applications!
             </p>
+
           </div>
         ) : (
           <div className="grid gap-6">
