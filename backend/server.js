@@ -26,15 +26,19 @@ const __dirname = path.resolve();
 const allowedOrigins = [
   "http://localhost:5173",
   "https://teamifymain.vercel.app",
+  "https://teamifymain.vercel.app",
   "https://teamify-pied.vercel.app",
+  "https://teamifymain-sachs-projects-c51763c4.vercel.app",
+  "https://teamifymain-git-main-sachs-projects-c51763c4.vercel.app",
 ];
 
-app.use(
-  cors({
-    origin: allowedOrigins,
+app.use({
+  cors: {
+    origin: "https://teamifymain.vercel.app",
     credentials: true,
-  })
-);
+    exposedHeaders: ["Content-Disposition"],
+  },
+});
 
 app.use((req, res, next) => {
   const origin = allowedOrigins.includes(req.headers.origin)
@@ -69,6 +73,19 @@ app.options("*", (req, res) => {
   );
   res.sendStatus(200);
 });
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 
 app.use(express.json({ limit: "5mb" }));
 app.use(cookieParser());
