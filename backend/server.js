@@ -26,7 +26,6 @@ const __dirname = path.resolve();
 const allowedOrigins = [
   "http://localhost:5173",
   "https://teamifymain.vercel.app",
-  "https://teamifymain.vercel.app/",
   "https://teamify-pied.vercel.app",
 ];
 
@@ -36,6 +35,40 @@ app.use(
     credentials: true,
   })
 );
+
+app.use((req, res, next) => {
+  const origin = allowedOrigins.includes(req.headers.origin)
+    ? req.headers.origin
+    : "";
+  res.header("Access-Control-Allow-Origin", origin);
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+  );
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  next();
+});
+
+app.options("*", (req, res) => {
+  const origin = allowedOrigins.includes(req.headers.origin)
+    ? req.headers.origin
+    : "";
+  res.header("Access-Control-Allow-Origin", origin);
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+  );
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  res.sendStatus(200);
+});
 
 app.use(express.json({ limit: "5mb" }));
 app.use(cookieParser());
