@@ -20,13 +20,13 @@ import { connectDB } from "./lib/db.js";
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5000;
 const __dirname = path.resolve();
 
 const allowedOrigins = [
   "http://localhost:5173",
-  process.env.NODE_URL,
-  process.env.BACKEND_URL,
+  "https://teamifymain.vercel.app",
+  "https://teamify-pied.vercel.app",
 ];
 
 app.use(
