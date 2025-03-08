@@ -24,10 +24,7 @@ const PORT = process.env.PORT;
 const __dirname = path.resolve();
 
 
-const allowedOrigins =
-  process.env.NODE_ENV === "production"
-    ? [process.env.NODE_URL]
-    : ["http://localhost:5173", process.env.NODE_URL];
+const allowedOrigins =  ["http://localhost:5173", process.env.NODE_URL, process.env.BACKEND_URL];
 
 app.use(
   cors({
@@ -49,6 +46,11 @@ app.use("/api/v1/project", projectRoutes);
 app.use("/api/v1/editProject", editProjectRoutes);
 app.use("/api/v1/appliedProjects", appliedProjectsRoutes);
 app.use("/api/v1/chat/", chatRoutes);
+
+app.get("/", (req, res) => {
+  res.send("Backend is running 🚀");
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
