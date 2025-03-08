@@ -32,14 +32,6 @@ const allowedOrigins = [
   "https://teamifymain-git-main-sachs-projects-c51763c4.vercel.app",
 ];
 
-app.use({
-  cors: {
-    origin: "https://teamifymain.vercel.app",
-    credentials: true,
-    exposedHeaders: ["Content-Disposition"],
-  },
-});
-
 app.use((req, res, next) => {
   const origin = allowedOrigins.includes(req.headers.origin)
     ? req.headers.origin
