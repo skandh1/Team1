@@ -23,49 +23,16 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const __dirname = path.resolve();
 
+// ✅ Allowed origins for CORS
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://teamifymain.vercel.app",
   "https://teamifymain.vercel.app",
   "https://teamify-pied.vercel.app",
   "https://teamifymain-sachs-projects-c51763c4.vercel.app",
   "https://teamifymain-git-main-sachs-projects-c51763c4.vercel.app",
 ];
 
-app.use((req, res, next) => {
-  const origin = allowedOrigins.includes(req.headers.origin)
-    ? req.headers.origin
-    : "";
-  res.header("Access-Control-Allow-Origin", origin);
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, PATCH, OPTIONS"
-  );
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  );
-  next();
-});
-
-app.options("*", (req, res) => {
-  const origin = allowedOrigins.includes(req.headers.origin)
-    ? req.headers.origin
-    : "";
-  res.header("Access-Control-Allow-Origin", origin);
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, PATCH, OPTIONS"
-  );
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  );
-  res.sendStatus(200);
-});
-
+// ✅ CORS configuration
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -75,13 +42,23 @@ app.use(
         callback(new Error("Not allowed by CORS"));
       }
     },
-    credentials: true,
+    credentials: true, // ✅ Allow cookies
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: [
+      "Origin",
+      "X-Requested-With",
+      "Content-Type",
+      "Accept",
+      "Authorization",
+    ],
   })
 );
 
+// ✅ Body parser for JSON and cookies
 app.use(express.json({ limit: "5mb" }));
 app.use(cookieParser());
 
+// ✅ Routes
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/posts", postRoutes);
@@ -93,11 +70,22 @@ app.use("/api/v1/editProject", editProjectRoutes);
 app.use("/api/v1/appliedProjects", appliedProjectsRoutes);
 app.use("/api/v1/chat/", chatRoutes);
 
+// ✅ Health check route
 app.get("/", (req, res) => {
   res.send("Backend is running 🚀");
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  connectDB();
-});
+// ✅ Connect to Database and Start Server
+const startServer = async () => {
+  try {
+    await connectDB(); // ✅ Connect to the database
+    app.listen(PORT, () => {
+      console.log(`✅ Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("❌ Failed to start server:", error.message);
+    process.exit(1);
+  }
+};
+
+startServer();
