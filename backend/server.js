@@ -23,8 +23,11 @@ const app = express();
 const PORT = process.env.PORT;
 const __dirname = path.resolve();
 
-
-const allowedOrigins =  ["http://localhost:5173", process.env.NODE_URL, process.env.BACKEND_URL];
+const allowedOrigins = [
+  "http://localhost:5173",
+  process.env.NODE_URL,
+  process.env.BACKEND_URL,
+];
 
 app.use(
   cors({
@@ -50,7 +53,6 @@ app.use("/api/v1/chat/", chatRoutes);
 app.get("/", (req, res) => {
   res.send("Backend is running 🚀");
 });
-
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
