@@ -26,6 +26,7 @@ const __dirname = path.resolve();
 const allowedOrigins = [
   "http://localhost:5173",
   "https://teamifymain.vercel.app",
+  "https://teamifymain.vercel.app/",
   "https://teamify-pied.vercel.app",
 ];
 
