@@ -1,5 +1,5 @@
 import express from "express";
-import { login, logout, signup, getCurrentUser, verifyEmail, verifySecurityAnswer, resetPassword } from "../controllers/auth.controller.js";
+import { login, logout, signup, getCurrentUser, verifyEmail, verifySecurityAnswer, resetPassword, test } from "../controllers/auth.controller.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
@@ -11,6 +11,7 @@ router.post("/verifyEmail", verifyEmail);
 router.post("/verifySecurityAnswer", verifySecurityAnswer);
 router.post("/resetPassword", resetPassword);
 router.post("/verifyEmail", verifyEmail);
+router.get("/test", test)
 
 router.get("/me", protectRoute, getCurrentUser);
 

@@ -165,3 +165,7 @@ export const resetPassword = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const test = async (req, res) => {
+	res.status(200).json({ message: "Test route" });
+}

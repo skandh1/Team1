@@ -30,6 +30,7 @@ const allowedOrigins = [
   "https://teamify-pied.vercel.app",
   "https://teamifymain-sachs-projects-c51763c4.vercel.app",
   "https://teamifymain-git-main-sachs-projects-c51763c4.vercel.app",
+  process.env.FRONTEND_URL,
 ];
 
 // ✅ CORS configuration
