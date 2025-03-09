@@ -7,4 +7,5 @@ export default defineConfig({
     outDir: "dist", // Ensure it's set to "dist"
   },
   plugins: [react()],
+  base: "/",
 });

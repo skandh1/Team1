@@ -42,7 +42,7 @@ app.use(
         callback(new Error("Not allowed by CORS"));
       }
     },
-    credentials: true, // ✅ Allow cookies
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: [
       "Origin",
@@ -73,6 +73,14 @@ app.use("/api/v1/chat/", chatRoutes);
 // ✅ Health check route
 app.get("/", (req, res) => {
   res.send("Backend is running 🚀");
+});
+
+// ✅ Static file serving for frontend (Optional)
+app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
+// ✅ Handle React Router refresh issue
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
 });
 
 // ✅ Connect to Database and Start Server
