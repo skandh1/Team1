@@ -45,7 +45,7 @@ export const signup = async (req, res) => {
     res.cookie("jwt-linkedin", token, {
       httpOnly: true, // prevent XSS attack
       maxAge: 3 * 24 * 60 * 60 * 1000,
-      sameSite: "None", // prevent CSRF attacks,
+      // sameSite: "None", // prevent CSRF attacks,
       secure: process.env.NODE_ENV === "production", // prevents man-in-the-middle attacks
     });
 
@@ -87,12 +87,11 @@ export const login = async (req, res) => {
     await res.cookie("jwt-linkedin", token, {
       httpOnly: true,
       maxAge: 3 * 24 * 60 * 60 * 1000,
-      sameSite: "None",
-      path: "/",
+      // sameSite: "none",
       secure: process.env.NODE_ENV === "production",
     });
 
-    res.json({ message: "Logged in successfully" });
+    res.json({ message: "Logged in successfully", user: user });
   } catch (error) {
     console.error("Error in login controller:", error);
     res.status(500).json({ message: "Server error" });
