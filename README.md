@@ -8,9 +8,6 @@ MONGO_URI = mongodb+srv://shuskason:super321@cluster0.5d70o.mongodb.net/linkedin
 JWT_SECRET = secret
 NODE_ENV = development
 
-MAILTRAP_TOKEN=19ce66f2d978a9e1064b34a620ca39a6
-EMAIL_FROM=mailtrap@demomailtrap.com
-EMAIL_FROM_NAME=super
 
 CLOUDINARY_API_KEY=192363691924248
 CLOUDINARY_API_SECRET=ZMrIw7c5TOHN1ymX2YNnY7iJ7q0

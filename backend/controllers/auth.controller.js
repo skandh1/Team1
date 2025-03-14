@@ -42,22 +42,16 @@ export const signup = async (req, res) => {
       expiresIn: "3d",
     });
 
-    res.cookie("jwt-linkedin", token, {
+    res.cookie("jwt-teamify", token, {
       httpOnly: true, // prevent XSS attack
       maxAge: 3 * 24 * 60 * 60 * 1000,
-      sameSite: "None", // prevent CSRF attacks,
-      secure: process.env.NODE_ENV === "production", // prevents man-in-the-middle attacks
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/", // prevents man-in-the-middle attacks
     });
 
     res.status(201).json({ message: "User registered successfully" });
 
-    const profileUrl = process.env.CLIENT_URL + "/profile/" + user.username;
-
-    // try {
-    // 	await sendWelcomeEmail(user.email, user.name, profileUrl);
-    // } catch (emailError) {
-    // 	console.error("Error sending welcome Email", emailError);
-    // }
   } catch (error) {
     console.log("Error in signup: ", error.message);
     res.status(500).json({ message: "Internal server error" });
@@ -84,11 +78,12 @@ export const login = async (req, res) => {
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "3d",
     });
-    await res.cookie("jwt-linkedin", token, {
-      httpOnly: true,
+    await res.cookie("jwt-teamify", token, {
+      httpOnly: true, // prevent XSS attack
       maxAge: 3 * 24 * 60 * 60 * 1000,
-      sameSite: "None",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
       secure: process.env.NODE_ENV === "production",
+      path: "/",
     });
 
     res.json({ message: "Logged in successfully", user: user });
@@ -99,13 +94,13 @@ export const login = async (req, res) => {
 };
 
 export const logout = (req, res) => {
-  res.clearCookie("jwt-linkedin", {
+  res.clearCookie("jwt-teamify", {
     httpOnly: true,
     sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     secure: process.env.NODE_ENV === "production",
     path: "/", // ✅ Ensure the same path is used as when setting the cookie
   });
-  
+
   return res.status(200).json({ message: "Logged out successfully" });
 };
 
