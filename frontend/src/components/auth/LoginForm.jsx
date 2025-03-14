@@ -17,7 +17,6 @@ const LoginForm = ({ onForgotPassword }) => {
       return res.data;
     },
     onSuccess: (data) => {
-      console.log(data);
       toast.success(`Welcome back ${data.user.name}`);
       queryClient.invalidateQueries({ queryKey: ["authUser"] });
     },
